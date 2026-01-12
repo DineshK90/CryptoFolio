@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AddAssetForm from "../components/dashboard/AddAssetForm";
 import { fetchCoins } from "../services/coingecko";
+import { addAsset } from "../services/api";
 
 export default function AddAssetPage() {
   const navigate = useNavigate();
@@ -14,9 +15,10 @@ export default function AddAssetPage() {
       try {
         const data = await fetchCoins();
         setCoins(data);
-      } catch (err) {
-        setError("Failed to load coins. Please try again.");
-      } finally {
+} catch (err) {
+  console.error(err);
+  setError("Failed to load coins. Please try again.");
+} finally {
         setLoading(false);
       }
     }
@@ -24,16 +26,20 @@ export default function AddAssetPage() {
     loadCoins();
   }, []);
 
-  function handleAddAsset(e) {
+  async function handleAddAsset(e) {
     e.preventDefault();
 
-    const coin = e.target.coin.value;
-    const quantity = e.target.quantity.value;
+    const coinId = e.target.coin.value;
+    const quantity = Number(e.target.quantity.value);
 
-    console.log("Asset added:", { coin, quantity });
+    try {
+      await addAsset(coinId, quantity);
+      navigate("/app");
+} catch (err) {
+  console.error(err);
+  setError("Failed to add asset. Please try again.");
+}
 
-    // Backend integration comes next
-    navigate("/app");
   }
 
   if (error) {
