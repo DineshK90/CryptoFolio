@@ -1,31 +1,85 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import MarketPreview from "./MarketPreview";
+import { fetchBitcoinMarketChart } from "../../services/market";
 
 export default function HeroSection() {
+  const [marketData, setMarketData] = useState(null);
+  const [selectedRange, setSelectedRange] = useState(7);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    async function loadMarket() {
+      setLoading(true);
+      setError(false);
+
+      try {
+        const data = await fetchBitcoinMarketChart(selectedRange);
+        setMarketData(data);
+      } catch (err) {
+        console.error(err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadMarket();
+  }, [selectedRange]);
+
   return (
-    <section className="text-center py-24 px-6">
-      <h2 className="text-4xl md:text-5xl font-bold mb-6">
-        Track Your Crypto Portfolio with Confidence
-      </h2>
+    <section className="relative py-32 px-6">
+      <div className="max-w-7xl mx-auto grid gap-16 md:grid-cols-2 items-center">
+        {/* LEFT */}
+        <div>
+          <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mb-6 leading-tight">
+            Track Your Crypto Portfolio
+            <span className="block text-indigo-400">
+              With Confidence
+            </span>
+          </h1>
 
-      <p className="text-slate-400 max-w-2xl mx-auto mb-8">
-        Monitor your digital assets, analyze performance, and stay informed
-        with real-time cryptocurrency market data.
-      </p>
+          <p className="text-slate-400 text-lg mb-8 max-w-xl">
+            Monitor your digital assets, visualize performance, and stay informed
+            with real-time cryptocurrency market data.
+          </p>
 
-      <div className="flex justify-center gap-4">
-        <Link
-          to="/register"
-          className="bg-indigo-600 hover:bg-indigo-500 px-6 py-3 rounded-md font-medium"
-        >
-          Get Started
-        </Link>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link
+              to="/register"
+              className="bg-indigo-500 hover:bg-indigo-400 text-white px-8 py-3 rounded-md font-medium transition"
+            >
+              Get Started
+            </Link>
 
-        <Link
-          to="/login"
-          className="border border-slate-700 px-6 py-3 rounded-md text-slate-300 hover:text-white"
-        >
-          Log In
-        </Link>
+            <Link
+              to="/login"
+              className="border border-slate-700 text-slate-200 hover:text-white px-8 py-3 rounded-md transition"
+            >
+              Log In
+            </Link>
+          </div>
+        </div>
+
+        {/* RIGHT */}
+        <div>
+          {loading ? (
+            <div className="h-64 bg-slate-900 rounded-2xl animate-pulse" />
+          ) : error || !marketData ? (
+            <div className="h-64 bg-slate-900 rounded-2xl flex items-center justify-center text-slate-400">
+              Failed to load market data
+            </div>
+          ) : (
+            <MarketPreview
+              prices={marketData.prices}
+              currentPrice={marketData.currentPrice}
+              changePercent={marketData.changePercent}
+              selectedRange={selectedRange}
+              onRangeChange={setSelectedRange}
+            />
+          )}
+        </div>
       </div>
     </section>
   );

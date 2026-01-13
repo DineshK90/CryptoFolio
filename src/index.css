@@ -1,5 +1,25 @@
-/* stylelint-disable at-rule-no-unknown */
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --bg-main: #020617; /* slate-950 */
+  --bg-card: #020617;
+}
+
+html {
+  background-color: #020617;
+}
+
+body {
+  color: #e5e7eb; /* slate-200 */
+}
+
+a:visited {
+  color: inherit;
+}
+
+a:focus,
+button:focus {
+  outline: none;
+}

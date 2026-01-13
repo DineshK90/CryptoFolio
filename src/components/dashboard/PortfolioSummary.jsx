@@ -1,14 +1,24 @@
 export default function PortfolioSummary() {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-lg p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div>
-        <p className="text-slate-400 text-sm">Total Portfolio Value</p>
-        <h2 className="text-3xl font-semibold">$0.00</h2>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* Total Value */}
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+        <p className="text-xs uppercase tracking-wide text-slate-500 mb-1">
+          Total Portfolio Value
+        </p>
+        <h2 className="text-4xl font-semibold tracking-tight">
+          $0.00
+        </h2>
       </div>
 
-      <div>
-        <p className="text-slate-400 text-sm">24h Change</p>
-        <p className="text-green-400 font-medium">+0.00%</p>
+      {/* 24h Change */}
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+        <p className="text-xs uppercase tracking-wide text-slate-500 mb-1">
+          24h Change
+        </p>
+        <p className="text-2xl font-medium text-green-400">
+          +0.00%
+        </p>
       </div>
     </div>
   );
