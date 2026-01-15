@@ -1,4 +1,3 @@
-import LandingNav from "../components/landing/LandingNav";
 import HeroSection from "../components/landing/HeroSection";
 import FeaturesSection from "../components/landing/FeaturesSection";
 import HowItWorks from "../components/landing/HowItWorks";
@@ -14,7 +13,6 @@ export default function LandingPage() {
         <div className="absolute bottom-[-200px] right-[-200px] h-[500px] w-[500px] rounded-full bg-cyan-400/10 blur-3xl" />
       </div>
 
-      <LandingNav />
       <HeroSection />
       <FeaturesSection />
       <HowItWorks />

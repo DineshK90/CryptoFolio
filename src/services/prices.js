@@ -1,15 +1,11 @@
-export async function fetchCoinPrices(coinIds) {
-  if (!coinIds.length) return {};
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
-  const ids = coinIds.join(",");
-
-  const res = await fetch(
-    `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`
-  );
+export async function fetchCoinPrices() {
+  const res = await fetch(`${API_BASE}/market/prices`);
 
   if (!res.ok) {
     throw new Error("Failed to fetch prices");
   }
 
-  return res.json();
+  return await res.json();
 }

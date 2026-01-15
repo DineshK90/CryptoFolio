@@ -15,19 +15,19 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public routes */}
+        {/* PUBLIC ROUTES */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
         </Route>
 
-        {/* Protected routes */}
+        {/* PROTECTED APP ROUTES */}
         <Route element={<ProtectedRoute />}>
-          <Route element={<AppLayout />}>
-            <Route path="/app" element={<DashboardPage />} />
-            <Route path="/app/add" element={<AddAssetPage />} />
-            <Route path="/app/profile" element={<ProfilePage />} />
+          <Route path="/app" element={<AppLayout />}>
+            <Route index element={<DashboardPage />} />
+            <Route path="add" element={<AddAssetPage />} />
+            <Route path="profile" element={<ProfilePage />} />
           </Route>
         </Route>
       </Routes>
