@@ -5,55 +5,88 @@ import {
   Tooltip,
   XAxis,
   YAxis,
+  CartesianGrid,
 } from "recharts";
+
+const ranges = [
+  { label: "7D", value: 7 },
+  { label: "30D", value: 30 },
+  { label: "90D", value: 90 },
+];
 
 export default function CoinMarketChart({
   data,
   coin,
-  onCoinChange,
-  options,
+  range,
+  onRangeChange,
 }) {
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
-      <div className="flex items-center justify-between mb-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
         <h2 className="text-lg font-medium">
-          Market Chart
+          {coin?.toUpperCase()} Price Chart
         </h2>
 
-        <select
-          value={coin}
-          onChange={(e) => onCoinChange(e.target.value)}
-          className="bg-slate-950 border border-slate-700 rounded-md px-3 py-1 text-sm"
-        >
-          {options.map((opt) => (
-            <option key={opt} value={opt}>
-              {opt.toUpperCase()}
-            </option>
+        {/* Range Selector */}
+        <div className="flex gap-2">
+          {ranges.map((r) => (
+            <button
+              key={r.value}
+              onClick={() => onRangeChange(r.value)}
+              className={`px-3 py-1 text-sm rounded-md transition
+                ${
+                  range === r.value
+                    ? "bg-indigo-500 text-white"
+                    : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                }`}
+            >
+              {r.label}
+            </button>
           ))}
-        </select>
+        </div>
       </div>
 
-      <div className="w-full">
-  <ResponsiveContainer width="100%" aspect={3}>
-    <LineChart data={data}>
-      <XAxis dataKey="time" hide />
-      <YAxis
-        tickFormatter={(v) => `$${v.toLocaleString()}`}
-      />
-      <Tooltip
-        formatter={(v) => `$${v.toLocaleString()}`}
-      />
-      <Line
-        type="monotone"
-        dataKey="price"
-        stroke="#6366f1"
-        strokeWidth={2}
-        dot={false}
-      />
-    </LineChart>
-  </ResponsiveContainer>
-</div>
+      {/* Chart */}
+      <ResponsiveContainer width="100%" aspect={3}>
+        <LineChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
 
+          <XAxis
+            dataKey="time"
+            tick={{ fill: "#94a3b8", fontSize: 12 }}
+            tickLine={false}
+            axisLine={false}
+          />
+
+          <YAxis
+            tickFormatter={(v) => `$${v.toLocaleString()}`}
+            tick={{ fill: "#94a3b8", fontSize: 12 }}
+            tickLine={false}
+            axisLine={false}
+            width={80}
+          />
+
+          <Tooltip
+            formatter={(v) => [`$${v.toLocaleString()}`, "Price"]}
+            contentStyle={{
+              backgroundColor: "#020617",
+              border: "1px solid #1e293b",
+              borderRadius: "8px",
+            }}
+            labelStyle={{ color: "#94a3b8" }}
+          />
+
+          <Line
+            type="monotone"
+            dataKey="price"
+            stroke="#6366f1"
+            strokeWidth={2}
+            dot={false}
+            isAnimationActive
+          />
+        </LineChart>
+      </ResponsiveContainer>
     </div>
   );
 }

@@ -1,41 +1,41 @@
 import { Link } from "react-router-dom";
+import Sparkline from "./Sparkline.jsx";
 
-export default function AssetsCard({ assets }) {
+export default function AssetsCard({ assets, onSelect, selected }) {
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-medium">
-          Your Assets
-        </h2>
+        <h2 className="text-lg font-medium">Your Assets</h2>
 
         <Link
           to="/app/add"
-          className="text-sm bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-1.5 rounded-md transition whitespace-nowrap"
+          className="text-sm bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-1.5 rounded-md transition"
         >
           Buy / Sell
         </Link>
       </div>
 
-      {/* Asset List */}
-      <div className="space-y-4">
-        {assets.length === 0 && (
-          <p className="text-sm text-slate-400">
-            You don’t own any assets yet.
-          </p>
-        )}
-
+      {/* List */}
+      <div className="space-y-3">
         {assets.map((asset) => {
           const isPositive = asset.change24h >= 0;
+          const isActive = selected === asset.coin_id;
 
           return (
-            <div
+            <button
               key={asset.coin_id}
-              className="flex items-center justify-between gap-4 p-3 rounded-lg hover:bg-slate-800 transition"
+              onClick={() => onSelect(asset.coin_id)}
+              className={`w-full flex items-center justify-between gap-4 p-3 rounded-lg transition text-left
+                ${
+                  isActive
+                    ? "bg-slate-800 border border-indigo-500/40"
+                    : "hover:bg-slate-800"
+                }`}
             >
-              {/* Left: Coin & Quantity */}
+              {/* Coin */}
               <div>
-                <p className="font-medium uppercase tracking-wide">
+                <p className="font-medium uppercase">
                   {asset.coin_id}
                 </p>
                 <p className="text-sm text-slate-400">
@@ -43,7 +43,13 @@ export default function AssetsCard({ assets }) {
                 </p>
               </div>
 
-              {/* Right: Value & Change */}
+              {/* Sparkline */}
+              <Sparkline
+                data={asset.history}
+                positive={isPositive}
+              />
+
+              {/* Value */}
               <div className="text-right">
                 <p className="font-medium">
                   ${asset.value.toLocaleString()}
@@ -59,7 +65,7 @@ export default function AssetsCard({ assets }) {
                   {asset.change24h.toFixed(2)}%
                 </p>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>

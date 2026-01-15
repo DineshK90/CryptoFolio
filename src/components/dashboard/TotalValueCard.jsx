@@ -1,3 +1,5 @@
+import AnimatedNumber from "../ui/AnimatedNumber";
+
 export default function TotalValueCard({
   totalValue,
   changePercent,
@@ -11,7 +13,7 @@ export default function TotalValueCard({
       </h2>
 
       <p className="text-3xl font-semibold mb-2">
-        ${totalValue.toLocaleString()}
+        <AnimatedNumber value={totalValue} />
       </p>
 
       <p
