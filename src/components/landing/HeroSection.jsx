@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import MarketPreview from "./MarketPreview";
-import { fetchBitcoinMarketChart } from "../../services/market";
+import { fetchCoinMarketChart } from "../../services/market";
 
 export default function HeroSection() {
-  const [marketData, setMarketData] = useState(null);
+  const [prices, setPrices] = useState([]);
   const [selectedRange, setSelectedRange] = useState(7);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -15,8 +15,9 @@ export default function HeroSection() {
       setError(false);
 
       try {
-        const data = await fetchBitcoinMarketChart(selectedRange);
-        setMarketData(data);
+        // Landing page always previews Bitcoin
+        const data = await fetchCoinMarketChart("bitcoin", selectedRange);
+        setPrices(data);
       } catch (err) {
         console.error(err);
         setError(true);
@@ -27,6 +28,19 @@ export default function HeroSection() {
 
     loadMarket();
   }, [selectedRange]);
+
+  // Compute derived values safely
+  const currentPrice =
+    prices.length > 0 ? prices[prices.length - 1].price : null;
+
+  const changePercent =
+    prices.length > 1
+      ? (
+          ((prices[prices.length - 1].price - prices[0].price) /
+            prices[0].price) *
+          100
+        ).toFixed(2)
+      : null;
 
   return (
     <section className="relative py-32 px-6">
@@ -66,15 +80,15 @@ export default function HeroSection() {
         <div>
           {loading ? (
             <div className="h-64 bg-slate-900 rounded-2xl animate-pulse" />
-          ) : error || !marketData ? (
+          ) : error || prices.length === 0 ? (
             <div className="h-64 bg-slate-900 rounded-2xl flex items-center justify-center text-slate-400">
               Failed to load market data
             </div>
           ) : (
             <MarketPreview
-              prices={marketData.prices}
-              currentPrice={marketData.currentPrice}
-              changePercent={marketData.changePercent}
+              prices={prices}
+              currentPrice={currentPrice}
+              changePercent={changePercent}
               selectedRange={selectedRange}
               onRangeChange={setSelectedRange}
             />

@@ -12,9 +12,11 @@ export default function AppLayout() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
+      {/* Top Navigation */}
       <header className="sticky top-0 z-40 backdrop-blur bg-slate-950/80 border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          {/* Brand (IMPORTANT FIX HERE) */}
+          
+          {/* Brand */}
           <Link
             to="/app"
             className="text-xl font-semibold tracking-tight hover:opacity-90 transition"
@@ -22,8 +24,8 @@ export default function AppLayout() {
             <span className="text-indigo-400">Crypto</span>Folio
           </Link>
 
-          {/* Nav */}
-          <nav className="flex items-center gap-6">
+          {/* Navigation */}
+          <nav className="flex items-center gap-5">
             <Link
               to="/app"
               className="text-sm text-slate-300 hover:text-white transition"
@@ -38,12 +40,26 @@ export default function AppLayout() {
               Profile
             </Link>
 
-            {user?.displayName && (
-              <span className="hidden sm:inline-flex px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs text-slate-300">
-                {user.displayName}
-              </span>
+            {/* Avatar + Name */}
+            {user && (
+              <div className="flex items-center gap-2">
+                {user.photoURL && (
+                  <img
+  src={user.photoURL}
+  alt="Profile"
+  className="w-8 h-8 rounded-full border border-slate-700 object-cover"
+  style={{ imageRendering: "auto" }}
+/>
+
+                )}
+
+                <span className="hidden sm:inline text-sm text-slate-300">
+                  {user.displayName}
+                </span>
+              </div>
             )}
 
+            {/* Logout */}
             <button
               onClick={handleLogout}
               className="text-sm text-slate-400 hover:text-red-400 transition focus:outline-none"
@@ -54,6 +70,7 @@ export default function AppLayout() {
         </div>
       </header>
 
+      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
         <Outlet />
       </main>
