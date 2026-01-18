@@ -1,38 +1,63 @@
+import { motion } from "framer-motion";
+
 const steps = [
-  "Create an account using secure authentication.",
-  "Add cryptocurrencies and enter the quantities you want to track.",
-  "Monitor portfolio performance with live market updates.",
+  {
+    title: "Create an Account",
+    desc: "Sign up securely using Firebase authentication.",
+    icon: "👤",
+  },
+  {
+    title: "Add Your Assets",
+    desc: "Track cryptocurrencies and enter quantities you own.",
+    icon: "➕",
+  },
+  {
+    title: "Monitor Performance",
+    desc: "See portfolio value and live market updates instantly.",
+    icon: "📊",
+  },
 ];
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-28 px-6 bg-slate-950">
-      {/* Header */}
-      <div className="max-w-3xl mx-auto text-center mb-20">
-        <h3 className="text-3xl md:text-4xl font-semibold tracking-tight mb-4">
+    <section id="how-it-works" className="py-32 px-6">
+      <div className="max-w-5xl mx-auto">
+        <motion.h2
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-3xl md:text-4xl font-semibold text-center mb-4"
+        >
           How CryptoFolio Works
-        </h3>
-        <p className="text-slate-400 text-lg">
+        </motion.h2>
+
+        <p className="text-slate-400 text-center mb-16">
           Get started in minutes with a simple, guided workflow.
         </p>
-      </div>
 
-      {/* Steps */}
-      <div className="grid gap-6 max-w-4xl mx-auto">
-        {steps.map((step, idx) => (
-          <div
-            key={step}
-            className="flex items-start gap-6 bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-sm"
-          >
-            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-semibold">
-              {idx + 1}
-            </div>
+        <div className="grid gap-8 md:grid-cols-3">
+          {steps.map((step, idx) => (
+            <motion.div
+              key={step.title}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              viewport={{ once: true }}
+              className="bg-slate-900/70 backdrop-blur border border-slate-800 rounded-2xl p-6 text-center shadow-lg"
+            >
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl font-semibold">
+                {idx + 1}
+              </div>
 
-            <p className="text-slate-300 leading-relaxed">
-              {step}
-            </p>
-          </div>
-        ))}
+              <div className="text-3xl mb-4">{step.icon}</div>
+
+              <h3 className="font-medium mb-2">{step.title}</h3>
+              <p className="text-slate-400 text-sm">
+                {step.desc}
+              </p>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );

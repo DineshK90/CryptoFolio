@@ -1,99 +1,72 @@
-import {
-  LineChart,
-  Line,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-} from "recharts";
-
-const ranges = [
-  { label: "7D", value: 7 },
-  { label: "30D", value: 30 },
-  { label: "90D", value: 90 },
-];
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function MarketPreview({
-  prices,
+  prices = [],
   currentPrice,
   changePercent,
   selectedRange,
   onRangeChange,
 }) {
-  const isPositive = changePercent >= 0;
+  const isPositive = Number(changePercent) >= 0;
+
+  // 🔒 Guard: do not render chart if no data
+  if (!prices.length || currentPrice == null) {
+    return (
+      <div className="h-64 flex items-center justify-center text-slate-400">
+        Loading market data…
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-slate-900/70 backdrop-blur border border-slate-800 rounded-2xl p-6 shadow-xl">
+    <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-slate-400">
-            Bitcoin · Last {selectedRange} Days
-          </p>
+          <p className="text-sm text-slate-400">Bitcoin Price</p>
           <p className="text-2xl font-semibold">
             ${currentPrice.toLocaleString()}
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          {ranges.map((range) => (
-            <button
-              key={range.value}
-              onClick={() => onRangeChange(range.value)}
-              className={`px-3 py-1 text-xs rounded-md transition ${
-                selectedRange === range.value
-                  ? "bg-indigo-500 text-white"
-                  : "bg-slate-800 text-slate-300 hover:text-white"
-              }`}
-            >
-              {range.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Change */}
-      <div
-        className={`text-sm mb-4 ${
-          isPositive ? "text-green-400" : "text-red-400"
-        }`}
-      >
-        {isPositive ? "+" : ""}
-        {changePercent}% over {selectedRange} days
+        {changePercent != null && (
+          <span
+            className={`text-sm font-medium ${
+              isPositive ? "text-green-400" : "text-red-400"
+            }`}
+          >
+            {isPositive ? "+" : ""}
+            {changePercent}%
+          </span>
+        )}
       </div>
 
       {/* Chart */}
-      <div className="h-56">
+      <div className="h-48">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={prices}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-
             <XAxis
               dataKey="time"
               tick={{ fill: "#94a3b8", fontSize: 12 }}
               tickLine={false}
               axisLine={false}
             />
-
             <YAxis
-              tickFormatter={(v) => `$${v.toLocaleString()}`}
               tick={{ fill: "#94a3b8", fontSize: 12 }}
               tickLine={false}
               axisLine={false}
-              width={80}
+              domain={["auto", "auto"]}
             />
-
             <Tooltip
-              formatter={(v) => [`$${v.toLocaleString()}`, "Price"]}
               contentStyle={{
                 backgroundColor: "#020617",
                 border: "1px solid #1e293b",
                 borderRadius: "8px",
+                fontSize: "12px",
               }}
               labelStyle={{ color: "#94a3b8" }}
+              formatter={(value) => [`$${value}`, "Price"]}
             />
-
             <Line
               type="monotone"
               dataKey="price"
@@ -103,6 +76,23 @@ export default function MarketPreview({
             />
           </LineChart>
         </ResponsiveContainer>
+      </div>
+
+      {/* Range selector */}
+      <div className="flex gap-2">
+        {[7, 30, 90].map((range) => (
+          <button
+            key={range}
+            onClick={() => onRangeChange(range)}
+            className={`px-3 py-1 rounded-md text-sm transition ${
+              selectedRange === range
+                ? "bg-indigo-500 text-white"
+                : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+            }`}
+          >
+            {range}D
+          </button>
+        ))}
       </div>
     </div>
   );

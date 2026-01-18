@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import MarketPreview from "./MarketPreview";
 import { fetchCoinMarketChart } from "../../services/market";
@@ -15,7 +16,6 @@ export default function HeroSection() {
       setError(false);
 
       try {
-        // Landing page always previews Bitcoin
         const data = await fetchCoinMarketChart("bitcoin", selectedRange);
         setPrices(data);
       } catch (err) {
@@ -29,7 +29,6 @@ export default function HeroSection() {
     loadMarket();
   }, [selectedRange]);
 
-  // Compute derived values safely
   const currentPrice =
     prices.length > 0 ? prices[prices.length - 1].price : null;
 
@@ -43,57 +42,73 @@ export default function HeroSection() {
       : null;
 
   return (
-    <section className="relative py-32 px-6">
-      <div className="max-w-7xl mx-auto grid gap-16 md:grid-cols-2 items-center">
+    <section className="relative overflow-hidden">
+      {/* Background glow */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute top-[-200px] left-[-200px] w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-[-200px] right-[-200px] w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-3xl" />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-32 grid md:grid-cols-2 gap-16 items-center">
         {/* LEFT */}
-        <div>
-          <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mb-6 leading-tight">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <h1 className="text-4xl md:text-5xl font-semibold leading-tight mb-6">
             Track Your Crypto Portfolio
-            <span className="block text-indigo-400">
+            <span className="block text-indigo-400 mt-1">
               With Confidence
             </span>
           </h1>
 
-          <p className="text-slate-400 text-lg mb-8 max-w-xl">
-            Monitor your digital assets, visualize performance, and stay informed
+          <p className="text-slate-400 text-lg max-w-xl mb-8">
+            Monitor your assets, visualize performance, and stay informed
             with real-time cryptocurrency market data.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Link
               to="/register"
-              className="bg-indigo-500 hover:bg-indigo-400 text-white px-8 py-3 rounded-md font-medium transition"
+              className="bg-indigo-500 hover:bg-indigo-400 px-8 py-3 rounded-md font-medium transition"
             >
               Get Started
             </Link>
 
             <Link
               to="/login"
-              className="border border-slate-700 text-slate-200 hover:text-white px-8 py-3 rounded-md transition"
+              className="border border-slate-700 px-8 py-3 rounded-md text-slate-300 hover:text-white transition"
             >
               Log In
             </Link>
           </div>
-        </div>
+        </motion.div>
 
         {/* RIGHT */}
-        <div>
-          {loading ? (
-            <div className="h-64 bg-slate-900 rounded-2xl animate-pulse" />
-          ) : error || prices.length === 0 ? (
-            <div className="h-64 bg-slate-900 rounded-2xl flex items-center justify-center text-slate-400">
-              Failed to load market data
-            </div>
-          ) : (
-            <MarketPreview
-              prices={prices}
-              currentPrice={currentPrice}
-              changePercent={changePercent}
-              selectedRange={selectedRange}
-              onRangeChange={setSelectedRange}
-            />
-          )}
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+        >
+          <div className="bg-slate-900/70 backdrop-blur border border-slate-800 rounded-2xl p-4 shadow-xl">
+            {loading ? (
+              <div className="h-64 animate-pulse bg-slate-800 rounded-xl" />
+            ) : error || !prices.length ? (
+              <div className="h-64 flex items-center justify-center text-slate-400">
+                Failed to load market data
+              </div>
+            ) : (
+              <MarketPreview
+                prices={prices}
+                currentPrice={currentPrice}
+                changePercent={changePercent}
+                selectedRange={selectedRange}
+                onRangeChange={setSelectedRange}
+              />
+            )}
+          </div>
+        </motion.div>
       </div>
     </section>
   );
