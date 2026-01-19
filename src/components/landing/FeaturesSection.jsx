@@ -45,10 +45,10 @@ export default function FeaturesSection() {
               className="bg-slate-900/70 backdrop-blur border border-slate-800 rounded-2xl overflow-hidden shadow-xl"
             >
               <img
-                src={f.img}
-                alt={f.title}
-                className="w-full h-48 object-cover bg-slate-950"
-              />
+  src={f.img}
+  alt={f.title}
+  className="w-full h-40 md:h-48 object-cover bg-slate-950"
+/>
 
               <div className="p-6">
                 <h3 className="text-lg font-medium mb-2">

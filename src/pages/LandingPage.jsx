@@ -3,6 +3,7 @@ import FeaturesSection from "../components/landing/FeaturesSection";
 import HowItWorks from "../components/landing/HowItWorks";
 import CTASection from "../components/landing/CTASection";
 import Footer from "../components/landing/Footer";
+import ComparisonSection from "../components/landing/ComparisonSection";
 
 export default function LandingPage() {
   return (
@@ -15,6 +16,7 @@ export default function LandingPage() {
 
       <HeroSection />
       <FeaturesSection />
+      <ComparisonSection />
       <HowItWorks />
       <CTASection />
       <Footer />
