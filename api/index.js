@@ -239,6 +239,14 @@ app.get("/market/prices", async (_req, res) => {
   }
 });
 
+app.get("/", (_req, res) => {
+  res.json({ status: "api alive" });
+});
+
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok" });
+});
+
 /* =====================
    EXPORT FOR VERCEL
 ===================== */
