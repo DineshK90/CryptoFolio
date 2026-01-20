@@ -42,14 +42,15 @@ export default function HeroSection() {
       : null;
 
   return (
-    <section className="relative overflow-hidden py-20 md:py-32 px-6">
-      {/* Background glow */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-[-200px] left-[-200px] w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-[-200px] right-[-200px] w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-3xl" />
-      </div>
+    <section className="relative overflow-hidden">
+      {/* Subtle background gradient */}
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-indigo-500/10 via-transparent to-transparent" />
 
-      <div className="max-w-7xl mx-auto px-6 py-32 grid md:grid-cols-2 gap-16 items-center">
+      {/* Soft glow accents */}
+      <div className="absolute -top-48 -left-48 w-[420px] h-[420px] bg-indigo-600/20 rounded-full blur-3xl -z-10" />
+      <div className="absolute -bottom-48 -right-48 w-[420px] h-[420px] bg-blue-500/10 rounded-full blur-3xl -z-10" />
+
+      <div className="max-w-7xl mx-auto px-6 py-24 md:py-28 grid md:grid-cols-2 gap-14 items-center">
         {/* LEFT */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -65,13 +66,14 @@ export default function HeroSection() {
 
           <p className="text-slate-400 text-lg max-w-xl mb-8">
             Monitor your assets, visualize performance, and stay informed
-            with real-time cryptocurrency market data.
+            with real-time cryptocurrency market data — all in one clean,
+            focused dashboard.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Link
               to="/register"
-              className="bg-indigo-500 hover:bg-indigo-400 px-8 py-3 rounded-md font-medium transition"
+              className="bg-indigo-500 hover:bg-indigo-400 text-white px-8 py-3 rounded-md font-medium transition"
             >
               Get Started
             </Link>
@@ -90,6 +92,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.15 }}
+          className="relative"
         >
           <div className="bg-slate-900/70 backdrop-blur border border-slate-800 rounded-2xl p-4 shadow-xl">
             {loading ? (
