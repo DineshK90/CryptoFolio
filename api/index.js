@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import pkg from "pg";
 import admin from "firebase-admin";
+import serverless from "serverless-http";
 
 const { Pool } = pkg;
 
@@ -21,13 +22,10 @@ if (!admin.apps.length) {
     throw new Error("FIREBASE_SERVICE_ACCOUNT env var missing");
   }
 
-  const serviceAccount = JSON.parse(
-    process.env.FIREBASE_SERVICE_ACCOUNT
-  );
+  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
-  // 🔑 REQUIRED fix for Vercel env vars
-  serviceAccount.private_key =
-    serviceAccount.private_key.replace(/\\n/g, "\n");
+  // 🔑 Fix multiline private key for Vercel
+  serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
 
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -52,7 +50,7 @@ const pool = new Pool({
 async function verifyToken(req, res, next) {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader?.startsWith("Bearer ")) {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ error: "Missing authorization token" });
   }
 
@@ -70,6 +68,10 @@ async function verifyToken(req, res, next) {
 /* =====================
    HEALTH CHECKS
 ===================== */
+app.get("/", (_req, res) => {
+  res.json({ status: "api alive" });
+});
+
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
@@ -208,9 +210,7 @@ app.put("/assets/:id", verifyToken, async (req, res) => {
 
 app.delete("/assets/:id", verifyToken, async (req, res) => {
   try {
-    await pool.query("DELETE FROM assets WHERE id = $1", [
-      req.params.id,
-    ]);
+    await pool.query("DELETE FROM assets WHERE id = $1", [req.params.id]);
     res.json({ success: true });
   } catch (err) {
     console.error("Delete asset error:", err);
@@ -239,15 +239,7 @@ app.get("/market/prices", async (_req, res) => {
   }
 });
 
-app.get("/", (_req, res) => {
-  res.json({ status: "api alive" });
-});
-
-app.get("/health", (_req, res) => {
-  res.json({ status: "ok" });
-});
-
 /* =====================
-   EXPORT FOR VERCEL
+   EXPORT (VERCEL REQUIRED)
 ===================== */
-export default app;
+export default serverless(app);
