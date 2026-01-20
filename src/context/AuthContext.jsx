@@ -17,7 +17,7 @@ export function AuthProvider({ children }) {
         try {
           await createUserIfNotExists();
         } catch (err) {
-          console.error(err);
+          console.error("User creation error:", err);
         }
       }
     });

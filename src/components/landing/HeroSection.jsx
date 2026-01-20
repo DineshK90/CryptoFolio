@@ -19,7 +19,7 @@ export default function HeroSection() {
         const data = await fetchCoinMarketChart("bitcoin", selectedRange);
         setPrices(data);
       } catch (err) {
-        console.error(err);
+        console.error("Market data fetch error:", err);
         setError(true);
       } finally {
         setLoading(false);

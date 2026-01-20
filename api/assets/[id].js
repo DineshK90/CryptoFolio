@@ -1,3 +1,5 @@
+// Vercel Serverless Function
+/* eslint-env node */
 import admin from "firebase-admin";
 import pkg from "pg";
 

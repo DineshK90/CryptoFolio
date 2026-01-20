@@ -32,8 +32,8 @@ export default function ProfilePage() {
     await user.reload();
     setPreview(url);
   } catch (err) {
-    console.error(err);
-    alert("Failed to upload image");
+    console.error("Upload error:", err);
+    alert("Failed to upload image. Please try again.");
   } finally {
     setLoading(false);
   }
@@ -53,8 +53,8 @@ export default function ProfilePage() {
       await user.reload();
       setPreview(avatarUrl);
     } catch (err) {
-      console.error(err);
-      alert("Failed to generate avatar");
+      console.error("Avatar generation error:", err);
+      alert("Failed to generate avatar. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -76,8 +76,8 @@ export default function ProfilePage() {
       await user.reload();
       setEditingName(false);
     } catch (err) {
-      console.error(err);
-      alert("Failed to update name");
+      console.error("Name update error:", err);
+      alert("Failed to update name. Please try again.");
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,5 @@
 import AnimatedNumber from "../ui/AnimatedNumber";
+import PropTypes from "prop-types";
 
 export default function TotalValueCard({
   totalValue,
@@ -27,3 +28,8 @@ export default function TotalValueCard({
     </div>
   );
 }
+
+TotalValueCard.propTypes = {
+  totalValue: PropTypes.number.isRequired,
+  changePercent: PropTypes.number.isRequired,
+};

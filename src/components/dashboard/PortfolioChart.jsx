@@ -7,6 +7,7 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
+import PropTypes from "prop-types";
 
 export default function PortfolioChart({ data }) {
   return (
@@ -66,3 +67,13 @@ export default function PortfolioChart({ data }) {
     </div>
   );
 }
+
+PortfolioChart.propTypes = {
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      time: PropTypes.string,
+      value: PropTypes.number,
+      fullDate: PropTypes.string,
+    })
+  ).isRequired,
+};

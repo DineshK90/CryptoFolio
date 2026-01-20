@@ -3,6 +3,7 @@ import {
   Line,
   ResponsiveContainer,
 } from "recharts";
+import PropTypes from "prop-types";
 
 export default function Sparkline({ data, positive }) {
   return (
@@ -21,3 +22,12 @@ export default function Sparkline({ data, positive }) {
     </div>
   );
 }
+
+Sparkline.propTypes = {
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      price: PropTypes.number,
+    })
+  ).isRequired,
+  positive: PropTypes.bool.isRequired,
+};

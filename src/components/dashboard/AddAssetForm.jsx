@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import PropTypes from "prop-types";
 
 export default function AddAssetForm({
   coins,
@@ -121,3 +122,22 @@ export default function AddAssetForm({
     </form>
   );
 }
+
+AddAssetForm.propTypes = {
+  coins: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      symbol: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  assets: PropTypes.arrayOf(
+    PropTypes.shape({
+      coin_id: PropTypes.string.isRequired,
+      quantity: PropTypes.number.isRequired,
+    })
+  ),
+  loading: PropTypes.bool.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  existingAsset: PropTypes.object,
+};

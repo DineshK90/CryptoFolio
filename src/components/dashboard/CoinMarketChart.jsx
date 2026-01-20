@@ -7,6 +7,7 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
+import PropTypes from "prop-types";
 
 const ranges = [
   { label: "7D", value: 7 },
@@ -99,3 +100,16 @@ export default function CoinMarketChart({
     </div>
   );
 }
+
+CoinMarketChart.propTypes = {
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      time: PropTypes.string,
+      price: PropTypes.number,
+      fullDate: PropTypes.string,
+    })
+  ).isRequired,
+  coin: PropTypes.string,
+  range: PropTypes.number.isRequired,
+  onRangeChange: PropTypes.func.isRequired,
+};

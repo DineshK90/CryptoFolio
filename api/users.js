@@ -1,3 +1,5 @@
+// Vercel Serverless Function
+/* eslint-env node */
 import admin from "firebase-admin";
 import pkg from "pg";
 
@@ -35,7 +37,7 @@ export default async function handler(req, res) {
     if (!token) return res.status(401).json({ error: "No token" });
 
     const decoded = await admin.auth().verifyIdToken(token);
-    const { uid, name } = req.body;
+    const { name } = req.body;
 
     const db = getPool();
 

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import Sparkline from "./Sparkline.jsx";
+import PropTypes from "prop-types";
 
 export default function AssetsCard({ assets, onSelect, selected }) {
   return (
@@ -72,3 +73,16 @@ export default function AssetsCard({ assets, onSelect, selected }) {
     </div>
   );
 }
+
+AssetsCard.propTypes = {
+  assets: PropTypes.arrayOf(
+    PropTypes.shape({
+      coin_id: PropTypes.string.isRequired,
+      quantity: PropTypes.number.isRequired,
+      change24h: PropTypes.number,
+      history: PropTypes.array,
+    })
+  ).isRequired,
+  onSelect: PropTypes.func.isRequired,
+  selected: PropTypes.string,
+};
