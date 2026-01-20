@@ -57,6 +57,9 @@ export default function CoinMarketChart({
             tick={{ fill: "#94a3b8", fontSize: 12 }}
             tickLine={false}
             axisLine={false}
+            angle={-45}
+            textAnchor="end"
+            height={60}
           />
 
           <YAxis
@@ -69,6 +72,12 @@ export default function CoinMarketChart({
 
           <Tooltip
             formatter={(v) => [`$${v.toLocaleString()}`, "Price"]}
+            labelFormatter={(label, payload) => {
+              if (payload && payload[0]?.payload?.fullDate) {
+                return payload[0].payload.fullDate;
+              }
+              return label;
+            }}
             contentStyle={{
               backgroundColor: "#020617",
               border: "1px solid #1e293b",

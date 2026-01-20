@@ -12,30 +12,54 @@ export default function ComparisonSection() {
 
         <div className="grid md:grid-cols-2 gap-8">
           {/* Typical Trackers */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8">
+          <div className="bg-slate-900 border border-red-900/30 rounded-2xl p-8">
             <h3 className="text-lg font-medium mb-6 text-slate-300">
               Typical Crypto Trackers
             </h3>
 
-            <ul className="space-y-4 text-slate-400">
-              <li>✕ Overloaded dashboards</li>
-              <li>✕ Hard-to-read portfolio summaries</li>
-              <li>✕ Limited performance context</li>
-              <li>✕ Poor mobile experience</li>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3">
+                <span className="text-red-500 font-bold text-xl shrink-0">✕</span>
+                <span className="text-slate-400">Overloaded dashboards</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-red-500 font-bold text-xl shrink-0">✕</span>
+                <span className="text-slate-400">Hard-to-read portfolio summaries</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-red-500 font-bold text-xl shrink-0">✕</span>
+                <span className="text-slate-400">Limited performance context</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-red-500 font-bold text-xl shrink-0">✕</span>
+                <span className="text-slate-400">Poor mobile experience</span>
+              </li>
             </ul>
           </div>
 
           {/* CryptoFolio */}
-          <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-8">
+          <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-2xl p-8">
             <h3 className="text-lg font-medium mb-6 text-white">
               CryptoFolio
             </h3>
 
-            <ul className="space-y-4 text-slate-200">
-              <li>✓ Clean, focused portfolio insights</li>
-              <li>✓ Real-time market data</li>
-              <li>✓ Clear performance tracking</li>
-              <li>✓ Designed for desktop and mobile</li>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3">
+                <span className="text-green-500 font-bold text-xl shrink-0">✓</span>
+                <span className="text-slate-200">Clean, focused portfolio insights</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-green-500 font-bold text-xl shrink-0">✓</span>
+                <span className="text-slate-200">Real-time market data</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-green-500 font-bold text-xl shrink-0">✓</span>
+                <span className="text-slate-200">Clear performance tracking</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-green-500 font-bold text-xl shrink-0">✓</span>
+                <span className="text-slate-200">Designed for desktop and mobile</span>
+              </li>
             </ul>
           </div>
         </div>
