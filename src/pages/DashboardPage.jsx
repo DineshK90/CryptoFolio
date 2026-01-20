@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import AssetsCard from "../components/dashboard/AssetsCard";
 import TotalValueCard from "../components/dashboard/TotalValueCard";
 import CoinMarketChart from "../components/dashboard/CoinMarketChart";
+import EmptyState from "../components/dashboard/EmptyState";
 import { fetchAssets } from "../services/api";
 import { fetchCoinPrices } from "../services/prices";
 import { fetchCoinMarketChart } from "../services/market";
@@ -16,7 +17,10 @@ export default function DashboardPage() {
   useEffect(() => {
     async function loadDashboard() {
       const rawAssets = await fetchAssets();
-      if (!rawAssets.length) return;
+      if (!rawAssets.length) {
+        setPortfolio({ empty: true });
+        return;
+      }
 
       const coinIds = [...new Set(rawAssets.map(a => a.coin_id))];
       const prices = await fetchCoinPrices(coinIds);
@@ -41,7 +45,11 @@ export default function DashboardPage() {
   }, [selectedCoin, range]);
 
   if (!portfolio) {
-    return <p className="text-slate-400">No assets yet.</p>;
+    return <p className="text-slate-400">Loading...</p>;
+  }
+
+  if (portfolio.empty) {
+    return <EmptyState />;
   }
 
   const avgChange =
