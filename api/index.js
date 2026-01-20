@@ -21,11 +21,17 @@ if (!admin.apps.length) {
     throw new Error("FIREBASE_SERVICE_ACCOUNT env variable is missing");
   }
 
-  admin.initializeApp({
-    credential: admin.credential.cert(
-      JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-    ),
-  });
+const serviceAccount = JSON.parse(
+  process.env.FIREBASE_SERVICE_ACCOUNT
+);
+
+// 🔑 FIX escaped newlines in private key
+serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
 }
 
 /* =====================
