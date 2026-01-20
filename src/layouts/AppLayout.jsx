@@ -138,7 +138,6 @@ export default function AppLayout() {
             </nav>
           )}
         </div>
-        </div>
       </header>
 
       {/* Main Content */}
