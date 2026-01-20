@@ -41,22 +41,33 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "User not found" });
     }
 
-    if (req.method === "GET") {
-      const assets = await db.query(
-        "SELECT * FROM assets WHERE user_id=$1",
-        [user.rows[0].id]
+    const { id: assetId } = req.query;
+
+    if (req.method === "PUT") {
+      const { quantity } = req.body;
+      const result = await db.query(
+        `UPDATE assets SET quantity=$1 WHERE id=$2 AND user_id=$3 RETURNING *`,
+        [quantity, assetId, user.rows[0].id]
       );
-      return res.json(assets.rows);
+      
+      if (!result.rows.length) {
+        return res.status(404).json({ error: "Asset not found" });
+      }
+      
+      return res.json(result.rows[0]);
     }
 
-    if (req.method === "POST") {
-      const { coinId, quantity } = req.body;
+    if (req.method === "DELETE") {
       const result = await db.query(
-        `INSERT INTO assets (user_id, coin_id, quantity)
-         VALUES ($1,$2,$3) RETURNING *`,
-        [user.rows[0].id, coinId, quantity]
+        `DELETE FROM assets WHERE id=$1 AND user_id=$2 RETURNING *`,
+        [assetId, user.rows[0].id]
       );
-      return res.json(result.rows[0]);
+      
+      if (!result.rows.length) {
+        return res.status(404).json({ error: "Asset not found" });
+      }
+      
+      return res.json({ success: true });
     }
 
     res.status(405).json({ error: "Method not allowed" });
@@ -65,4 +76,3 @@ export default async function handler(req, res) {
     res.status(500).json({ error: "API request failed" });
   }
 }
- 
