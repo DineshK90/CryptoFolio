@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
-import admin from "firebase-admin";
 import pkg from "pg";
+import admin from "firebase-admin";
 
 const { Pool } = pkg;
 
@@ -14,38 +14,36 @@ app.use(cors());
 app.use(express.json());
 
 /* =====================
-   FIREBASE ADMIN (SAFE INIT)
+   FIREBASE ADMIN (SERVERLESS SAFE)
 ===================== */
 if (!admin.apps.length) {
   if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
-    throw new Error("FIREBASE_SERVICE_ACCOUNT env variable is missing");
+    throw new Error("FIREBASE_SERVICE_ACCOUNT env var missing");
   }
 
-const serviceAccount = JSON.parse(
-  process.env.FIREBASE_SERVICE_ACCOUNT
-);
+  const serviceAccount = JSON.parse(
+    process.env.FIREBASE_SERVICE_ACCOUNT
+  );
 
-// 🔑 FIX escaped newlines in private key
-serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
+  // 🔑 REQUIRED fix for Vercel env vars
+  serviceAccount.private_key =
+    serviceAccount.private_key.replace(/\\n/g, "\n");
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
-
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
 }
 
 /* =====================
    DATABASE (NEON)
 ===================== */
 if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL env variable is missing");
+  throw new Error("DATABASE_URL env var missing");
 }
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  ssl: { rejectUnauthorized: false },
 });
 
 /* =====================
@@ -53,17 +51,15 @@ const pool = new Pool({
 ===================== */
 async function verifyToken(req, res, next) {
   const authHeader = req.headers.authorization;
-  const token = authHeader?.startsWith("Bearer ")
-    ? authHeader.split("Bearer ")[1]
-    : null;
 
-  if (!token) {
-    return res.status(401).json({ error: "Missing auth token" });
+  if (!authHeader?.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Missing authorization token" });
   }
 
+  const token = authHeader.split("Bearer ")[1];
+
   try {
-    const decoded = await admin.auth().verifyIdToken(token);
-    req.user = decoded;
+    req.user = await admin.auth().verifyIdToken(token);
     next();
   } catch (err) {
     console.error("Auth error:", err);
@@ -72,23 +68,33 @@ async function verifyToken(req, res, next) {
 }
 
 /* =====================
-   HEALTH CHECK (OPTIONAL BUT GOOD)
+   HEALTH CHECKS
 ===================== */
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
+});
+
+app.get("/health/db", async (_req, res) => {
+  try {
+    const result = await pool.query("SELECT NOW()");
+    res.json({ status: "ok", time: result.rows[0].now });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Database connection failed" });
+  }
 });
 
 /* =====================
    USERS
 ===================== */
 app.post("/users", verifyToken, async (req, res) => {
-  const { uid, name } = req.body;
-
-  if (!uid || !name) {
-    return res.status(400).json({ error: "Missing uid or name" });
-  }
-
   try {
+    const { uid, name } = req.body;
+
+    if (!uid || !name) {
+      return res.status(400).json({ error: "Missing uid or name" });
+    }
+
     const result = await pool.query(
       `
       INSERT INTO users (firebase_uid, display_name)
@@ -110,47 +116,21 @@ app.post("/users", verifyToken, async (req, res) => {
 /* =====================
    ASSETS (CRUD)
 ===================== */
-
-/* READ */
-app.get("/assets", verifyToken, async (req, res) => {
+app.post("/assets", verifyToken, async (req, res) => {
   try {
-    const userResult = await pool.query(
-      "SELECT id FROM users WHERE firebase_uid=$1",
-      [req.user.uid]
-    );
+    const { coinId, quantity } = req.body;
 
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({ error: "User not found" });
+    if (!coinId || quantity === undefined) {
+      return res.status(400).json({ error: "Missing coinId or quantity" });
     }
 
-    const assets = await pool.query(
-      "SELECT * FROM assets WHERE user_id=$1 ORDER BY created_at DESC",
-      [userResult.rows[0].id]
-    );
-
-    res.json(assets.rows);
-  } catch (err) {
-    console.error("Fetch assets error:", err);
-    res.status(500).json({ error: "Failed to fetch assets" });
-  }
-});
-
-/* CREATE */
-app.post("/assets", verifyToken, async (req, res) => {
-  const { coinId, quantity } = req.body;
-
-  if (!coinId || typeof quantity !== "number") {
-    return res.status(400).json({ error: "Invalid asset payload" });
-  }
-
-  try {
     const userResult = await pool.query(
-      "SELECT id FROM users WHERE firebase_uid=$1",
+      "SELECT id FROM users WHERE firebase_uid = $1",
       [req.user.uid]
     );
 
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({ error: "User not found" });
+    if (!userResult.rows.length) {
+      return res.status(400).json({ error: "User not found" });
     }
 
     const result = await pool.query(
@@ -169,16 +149,42 @@ app.post("/assets", verifyToken, async (req, res) => {
   }
 });
 
-/* UPDATE */
-app.put("/assets/:id", verifyToken, async (req, res) => {
-  const { quantity } = req.body;
-  const { id } = req.params;
-
-  if (typeof quantity !== "number") {
-    return res.status(400).json({ error: "Invalid quantity" });
-  }
-
+app.get("/assets", verifyToken, async (req, res) => {
   try {
+    const userResult = await pool.query(
+      "SELECT id FROM users WHERE firebase_uid = $1",
+      [req.user.uid]
+    );
+
+    if (!userResult.rows.length) {
+      return res.status(400).json({ error: "User not found" });
+    }
+
+    const assets = await pool.query(
+      `
+      SELECT id, coin_id, quantity, created_at
+      FROM assets
+      WHERE user_id = $1
+      ORDER BY created_at DESC
+      `,
+      [userResult.rows[0].id]
+    );
+
+    res.json(assets.rows);
+  } catch (err) {
+    console.error("Fetch assets error:", err);
+    res.status(500).json({ error: "Failed to fetch assets" });
+  }
+});
+
+app.put("/assets/:id", verifyToken, async (req, res) => {
+  try {
+    const { quantity } = req.body;
+
+    if (quantity === undefined) {
+      return res.status(400).json({ error: "Missing quantity" });
+    }
+
     const result = await pool.query(
       `
       UPDATE assets
@@ -186,10 +192,10 @@ app.put("/assets/:id", verifyToken, async (req, res) => {
       WHERE id = $2
       RETURNING *
       `,
-      [quantity, id]
+      [quantity, req.params.id]
     );
 
-    if (result.rows.length === 0) {
+    if (!result.rows.length) {
       return res.status(404).json({ error: "Asset not found" });
     }
 
@@ -200,16 +206,36 @@ app.put("/assets/:id", verifyToken, async (req, res) => {
   }
 });
 
-/* DELETE */
 app.delete("/assets/:id", verifyToken, async (req, res) => {
-  const { id } = req.params;
-
   try {
-    await pool.query("DELETE FROM assets WHERE id=$1", [id]);
+    await pool.query("DELETE FROM assets WHERE id = $1", [
+      req.params.id,
+    ]);
     res.json({ success: true });
   } catch (err) {
     console.error("Delete asset error:", err);
     res.status(500).json({ error: "Failed to delete asset" });
+  }
+});
+
+/* =====================
+   MARKET DATA (SERVER-SIDE)
+===================== */
+app.get("/market/prices", async (_req, res) => {
+  try {
+    const response = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true"
+    );
+
+    if (!response.ok) {
+      throw new Error("CoinGecko error");
+    }
+
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error("Market price error:", err);
+    res.status(500).json({ error: "Failed to fetch prices" });
   }
 });
 
