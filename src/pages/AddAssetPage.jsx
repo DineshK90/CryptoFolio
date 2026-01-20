@@ -31,23 +31,21 @@ export default function AddAssetPage() {
     const coinId = e.target.coin.value;
     const amount = Number(e.target.quantity.value);
 
-    const existing = assets.find((a) => a.coin_id === coinId);
+    // Calculate total quantity across all records for this coin
+    const totalQuantity = assets
+      .filter((a) => a.coin_id === coinId)
+      .reduce((sum, a) => sum + Number(a.quantity), 0);
 
-    if (existing) {
-      const newQuantity =
-        mode === "buy"
-          ? existing.quantity + amount
-          : existing.quantity - amount;
-
-      if (newQuantity < 0) {
-        alert("Cannot sell more than you own");
+    if (mode === "sell") {
+      if (amount > totalQuantity) {
+        alert(`Cannot sell more than you own. You have ${totalQuantity} available.`);
         return;
       }
-
-      await updateAsset(existing.id, newQuantity);
-    } else {
-      await addAsset(coinId, amount);
     }
+
+    // Always add a new transaction record (positive for buy, negative for sell)
+    const transactionAmount = mode === "buy" ? amount : -amount;
+    await addAsset(coinId, transactionAmount);
 
     navigate("/app");
   }
@@ -55,6 +53,7 @@ export default function AddAssetPage() {
   return (
     <AddAssetForm
       coins={coins}
+      assets={assets}
       loading={loading}
       onSubmit={handleSubmit}
     />

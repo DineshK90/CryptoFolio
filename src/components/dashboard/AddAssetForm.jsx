@@ -3,11 +3,18 @@ import { Link } from "react-router-dom";
 
 export default function AddAssetForm({
   coins,
+  assets = [],
   loading,
   onSubmit,
   existingAsset,
 }) {
   const [mode, setMode] = useState("buy"); // buy | sell
+  const [selectedCoin, setSelectedCoin] = useState("");
+
+  // Calculate total holdings for selected coin
+  const currentHoldings = assets
+    .filter((a) => a.coin_id === selectedCoin)
+    .reduce((sum, a) => sum + Number(a.quantity), 0);
 
   return (
     <form
@@ -53,6 +60,8 @@ export default function AddAssetForm({
           name="coin"
           required
           disabled={loading || !!existingAsset}
+          value={selectedCoin}
+          onChange={(e) => setSelectedCoin(e.target.value)}
           className="w-full px-4 py-2 rounded-md bg-slate-950 border border-slate-800"
         >
           <option value="">
@@ -65,6 +74,12 @@ export default function AddAssetForm({
             </option>
           ))}
         </select>
+
+        {selectedCoin && currentHoldings > 0 && (
+          <p className="text-xs text-indigo-400 mt-2">
+            Current holdings: {currentHoldings.toFixed(8)} {coins.find(c => c.id === selectedCoin)?.symbol.toUpperCase()}
+          </p>
+        )}
       </div>
 
       {/* Quantity */}
