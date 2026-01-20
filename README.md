@@ -290,7 +290,7 @@ This project is licensed under the MIT License.
 
 Contributions, issues, and feature requests are welcome!
 
-## 👨‍💻 Author
+## 👨‍💻 Author - Dinesh
 
 Built with ❤️ using modern web technologies
 
