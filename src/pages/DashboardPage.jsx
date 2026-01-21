@@ -34,6 +34,13 @@ export default function DashboardPage() {
         const prices = await fetchCoinPrices(coinIds);
         if (!mounted) return;
 
+        console.log("📊 Dashboard Debug:", {
+          rawAssets: rawAssets.length,
+          coinIds,
+          prices,
+          priceKeys: Object.keys(prices || {})
+        });
+
         const aggregated = calculatePortfolio(rawAssets, prices);
 
         // If all holdings were filtered out (zero quantities), show empty state

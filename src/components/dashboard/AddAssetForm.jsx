@@ -17,6 +17,18 @@ export default function AddAssetForm({
     .filter((a) => a.coin_id === selectedCoin)
     .reduce((sum, a) => sum + Number(a.quantity), 0);
 
+  // Limit sell dropdown to coins the user actually holds
+  const holdingsByCoin = assets.reduce((acc, a) => {
+    const qty = Number(a.quantity || 0);
+    acc[a.coin_id] = (acc[a.coin_id] || 0) + qty;
+    return acc;
+  }, {});
+
+  const availableCoins =
+    mode === "sell"
+      ? coins.filter((coin) => (holdingsByCoin[coin.id] || 0) > 0)
+      : coins;
+
   return (
     <form
       onSubmit={(e) => onSubmit(e, mode)}
@@ -66,10 +78,12 @@ export default function AddAssetForm({
           className="w-full px-4 py-2 rounded-md bg-slate-950 border border-slate-800"
         >
           <option value="">
-            Select a coin
+            {mode === "sell" && availableCoins.length === 0
+              ? "No coins to sell"
+              : "Select a coin"}
           </option>
 
-          {coins.map((coin) => (
+          {availableCoins.map((coin) => (
             <option key={coin.id} value={coin.id}>
               {coin.name} ({coin.symbol.toUpperCase()})
             </option>
