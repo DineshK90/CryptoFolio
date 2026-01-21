@@ -93,8 +93,8 @@ export default function DashboardPage() {
   }
 
   const avgChange =
-    portfolio.breakdown.reduce((s, a) => s + a.change24h, 0) /
-    portfolio.breakdown.length;
+    portfolio.breakdown.reduce((s, a) => s + (a.change24h || 0), 0) /
+    Math.max(portfolio.breakdown.length, 1);
 
   const containerVariants = {
     hidden: { opacity: 0 },
