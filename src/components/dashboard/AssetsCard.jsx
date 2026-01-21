@@ -3,6 +3,14 @@ import Sparkline from "./Sparkline.jsx";
 import PropTypes from "prop-types";
 
 export default function AssetsCard({ assets, onSelect, selected }) {
+  if (!Array.isArray(assets) || assets.length === 0) {
+    return (
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
+        <p className="text-slate-400 text-sm">No assets yet.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
       {/* Header */}
@@ -20,7 +28,14 @@ export default function AssetsCard({ assets, onSelect, selected }) {
       {/* List */}
       <div className="space-y-3">
         {assets.map((asset) => {
-          const isPositive = asset.change24h >= 0;
+          const change = Number(asset.change24h ?? 0);
+          const value = Number(asset.value ?? 0);
+          const qty = Number(asset.quantity ?? 0);
+          const history = Array.isArray(asset.history)
+            ? asset.history
+            : [];
+
+          const isPositive = change >= 0;
           const isActive = selected === asset.coin_id;
 
           return (
@@ -40,20 +55,26 @@ export default function AssetsCard({ assets, onSelect, selected }) {
                   {asset.coin_id}
                 </p>
                 <p className="text-sm text-slate-400">
-                  {asset.quantity}
+                  {qty}
                 </p>
               </div>
 
               {/* Sparkline */}
-              <Sparkline
-                data={asset.history}
-                positive={isPositive}
-              />
+              <div className="w-24">
+                {history.length ? (
+                  <Sparkline
+                    data={history}
+                    positive={isPositive}
+                  />
+                ) : (
+                  <div className="h-8 bg-slate-800 rounded animate-pulse" />
+                )}
+              </div>
 
               {/* Value */}
-              <div className="text-right">
+              <div className="text-right min-w-[90px]">
                 <p className="font-medium">
-                  ${asset.value.toLocaleString()}
+                  ${value.toLocaleString()}
                 </p>
                 <p
                   className={`text-sm ${
@@ -63,7 +84,7 @@ export default function AssetsCard({ assets, onSelect, selected }) {
                   }`}
                 >
                   {isPositive ? "+" : ""}
-                  {asset.change24h.toFixed(2)}%
+                  {change.toFixed(2)}%
                 </p>
               </div>
             </button>
@@ -81,6 +102,7 @@ AssetsCard.propTypes = {
       quantity: PropTypes.number.isRequired,
       change24h: PropTypes.number,
       history: PropTypes.array,
+      value: PropTypes.number,
     })
   ).isRequired,
   onSelect: PropTypes.func.isRequired,

@@ -77,18 +77,29 @@ export default async function handler(req, res) {
         VALUES ($1,$2,$3)
         RETURNING *
         `,
-        [userId, coinId, quantity]
+        [userId, coinId, Number(quantity)]
       );
 
       return res.json(result.rows[0]);
     }
 
-    /* ===== UPDATE ===== */
+    /* ===== UPDATE (AUTO DELETE WHEN 0) ===== */
     if (req.method === "PUT") {
       const { id, quantity } = req.body;
 
       if (!id || quantity === undefined) {
         return res.status(400).json({ error: "Missing id or quantity" });
+      }
+
+      const qty = Number(quantity);
+
+      // 🔥 Auto-delete when quantity is 0 or less
+      if (qty <= 0) {
+        await db.query(
+          "DELETE FROM assets WHERE id=$1 AND user_id=$2",
+          [id, userId]
+        );
+        return res.json({ deleted: true });
       }
 
       const result = await db.query(
@@ -98,7 +109,7 @@ export default async function handler(req, res) {
         WHERE id=$2 AND user_id=$3
         RETURNING *
         `,
-        [quantity, id, userId]
+        [qty, id, userId]
       );
 
       if (!result.rows.length) {

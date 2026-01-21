@@ -14,33 +14,37 @@ async function fetchWithTimeout(url, ms = 8000) {
   const timer = setTimeout(() => controller.abort(), ms);
 
   try {
-    const res = await fetch(url, { signal: controller.signal });
-    return res;
+    return await fetch(url, { signal: controller.signal });
+  } catch (err) {
+    console.warn("Price fetch failed:", url, err.message);
+    return null;
   } finally {
     clearTimeout(timer);
   }
 }
 
 /* =====================
-   FETCH PRICES
+   FETCH PRICES (SAFE)
 ===================== */
 export async function fetchCoinPrices(coinIds = []) {
   if (!coinIds.length) return {};
 
-  const groups = chunk(coinIds, 3); // CoinGecko safe batch size
+  const groups = chunk(coinIds, 3); // CoinGecko-safe batching
+  const merged = {};
 
-  const results = await Promise.all(
-    groups.map(async group => {
-      const res = await fetchWithTimeout(
-        `${API_BASE}/market/prices?ids=${group.join(",")}`
-      );
+  for (const group of groups) {
+    const res = await fetchWithTimeout(
+      `${API_BASE}/market/prices?ids=${group.join(",")}`
+    );
 
-      if (!res.ok) throw new Error("Failed to fetch prices");
+    if (!res || !res.ok) {
+      console.warn("Skipping failed price batch:", group);
+      continue;
+    }
 
-      return res.json();
-    })
-  );
+    const data = await res.json();
+    Object.assign(merged, data);
+  }
 
-  // merge all batch responses
-  return Object.assign({}, ...results);
+  return merged;
 }
