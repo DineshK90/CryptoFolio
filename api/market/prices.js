@@ -1,43 +1,45 @@
-// Vercel Serverless Function
+// api/market/prices.js
 import axios from "axios";
 
 export default async function handler(req, res) {
-  // Only allow GET
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const ids = req.query.ids;
+    const { ids } = req.query;
 
-    if (!ids || typeof ids !== "string") {
-      return res.status(400).json({ error: "Missing or invalid ids" });
+    if (!ids) {
+      return res.status(400).json({ error: "Missing ids param" });
     }
 
     const response = await axios.get(
       "https://api.coingecko.com/api/v3/simple/price",
       {
         params: {
-          ids,                 // e.g. "bitcoin,ethereum"
+          ids,
           vs_currencies: "usd",
           include_24hr_change: true,
         },
-        timeout: 8000,
-        headers: {
-          "User-Agent": "CryptoFolio/1.0",
-          Accept: "application/json",
-        },
+        timeout: 10000,
       }
     );
 
-    // Defensive: ensure object shape
-    if (!response.data || typeof response.data !== "object") {
-      return res.status(500).json({ error: "Invalid CoinGecko response" });
+    // 🔐 Normalize output
+    const safe = {};
+    for (const id of ids.split(",")) {
+      const coin = response.data[id];
+      if (coin) {
+        safe[id] = {
+          usd: Number(coin.usd || 0),
+          usd_24h_change: Number(coin.usd_24h_change || 0),
+        };
+      }
     }
 
-    return res.status(200).json(response.data);
+    return res.json(safe);
   } catch (err) {
-    console.error("CoinGecko API error:", err.message);
-    return res.status(500).json({ error: "Failed to fetch prices" });
+    console.error("CoinGecko error:", err.message);
+    return res.status(500).json({ error: "Price service failed" });
   }
 }
