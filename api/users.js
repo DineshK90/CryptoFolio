@@ -1,10 +1,8 @@
-// Vercel Serverless Function
 /* eslint-env node */
 import admin from "firebase-admin";
 import pkg from "pg";
 
 const { Pool } = pkg;
-
 let pool;
 
 function getPool() {
@@ -13,6 +11,8 @@ function getPool() {
       connectionString: process.env.DATABASE_URL,
       ssl: { rejectUnauthorized: false },
       max: 1,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
     });
   }
   return pool;
@@ -20,7 +20,8 @@ function getPool() {
 
 if (!admin.apps.length) {
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-  serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
+  serviceAccount.private_key =
+    serviceAccount.private_key.replace(/\\n/g, "\n");
 
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -33,9 +34,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const token = req.headers.authorization?.replace("Bearer ", "");
-    if (!token) return res.status(401).json({ error: "No token" });
+    const auth = req.headers.authorization;
+    if (!auth?.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Missing token" });
+    }
 
+    const token = auth.replace("Bearer ", "");
     const decoded = await admin.auth().verifyIdToken(token);
     const { name } = req.body;
 
@@ -51,14 +55,18 @@ export default async function handler(req, res) {
     }
 
     const result = await db.query(
-      `INSERT INTO users (firebase_uid, display_name)
-       VALUES ($1,$2) RETURNING *`,
+      `
+      INSERT INTO users (firebase_uid, display_name)
+      VALUES ($1,$2)
+      RETURNING *
+      `,
       [decoded.uid, name || "Anonymous"]
     );
 
-    res.json(result.rows[0]);
+    return res.json(result.rows[0]);
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "API request failed" });
+    console.error("USERS API ERROR:", err);
+    return res.status(500).json({ error: "Server error" });
   }
 }

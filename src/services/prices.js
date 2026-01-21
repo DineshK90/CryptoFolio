@@ -1,27 +1,46 @@
 const API_BASE = "/api";
 
-export async function fetchCoinPrices(coinIds = []) {
-  const res = await fetch(`${API_BASE}/market/prices`);
+/* =====================
+   HELPERS
+===================== */
+function chunk(arr, size) {
+  return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
+    arr.slice(i * size, i * size + size)
+  );
+}
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch prices");
+async function fetchWithTimeout(url, ms = 8000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(timer);
   }
+}
 
-  const allCoins = await res.json();
-  
-  // If no specific coins requested, return all
-  if (!coinIds.length) return allCoins;
-  
-  // Convert array to object keyed by coin ID
-  const priceMap = {};
-  allCoins.forEach(coin => {
-    if (coinIds.includes(coin.id)) {
-      priceMap[coin.id] = {
-        usd: coin.current_price,
-        usd_24h_change: coin.price_change_percentage_24h || 0,
-      };
-    }
-  });
-  
-  return priceMap;
+/* =====================
+   FETCH PRICES
+===================== */
+export async function fetchCoinPrices(coinIds = []) {
+  if (!coinIds.length) return {};
+
+  const groups = chunk(coinIds, 3); // CoinGecko safe batch size
+
+  const results = await Promise.all(
+    groups.map(async group => {
+      const res = await fetchWithTimeout(
+        `${API_BASE}/market/prices?ids=${group.join(",")}`
+      );
+
+      if (!res.ok) throw new Error("Failed to fetch prices");
+
+      return res.json();
+    })
+  );
+
+  // merge all batch responses
+  return Object.assign({}, ...results);
 }

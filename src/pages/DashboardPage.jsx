@@ -15,37 +15,58 @@ export default function DashboardPage() {
   const [range, setRange] = useState(7);
 
   useEffect(() => {
+    let mounted = true;
+
     async function loadDashboard() {
-      const rawAssets = await fetchAssets();
-      if (!rawAssets.length) {
+      try {
+        const rawAssets = await fetchAssets();
+        if (!mounted) return;
+
+        if (!rawAssets.length) {
+          setPortfolio({ empty: true });
+          return;
+        }
+
+        const coinIds = [...new Set(rawAssets.map(a => a.coin_id))];
+
+        // 🔒 Safe price fetch
+        const prices = await fetchCoinPrices(coinIds);
+        if (!mounted) return;
+
+        const aggregated = calculatePortfolio(rawAssets, prices);
+
+        setPortfolio(aggregated);
+        setSelectedCoin(aggregated.breakdown[0].coin_id);
+
+      } catch (err) {
+        console.error("Dashboard load failed:", err);
         setPortfolio({ empty: true });
-        return;
       }
-
-      const coinIds = [...new Set(rawAssets.map(a => a.coin_id))];
-      const prices = await fetchCoinPrices(coinIds);
-      const aggregated = calculatePortfolio(rawAssets, prices);
-
-      setPortfolio(aggregated);
-      setSelectedCoin(aggregated.breakdown[0].coin_id);
     }
 
     loadDashboard();
+    return () => (mounted = false);
   }, []);
 
   useEffect(() => {
     if (!selectedCoin) return;
+    let mounted = true;
 
     async function loadChart() {
-      const data = await fetchCoinMarketChart(selectedCoin, range);
-      setChartData(data);
+      try {
+        const data = await fetchCoinMarketChart(selectedCoin, range);
+        if (mounted) setChartData(data);
+      } catch (err) {
+        console.error("Chart load failed:", err);
+      }
     }
 
     loadChart();
+    return () => (mounted = false);
   }, [selectedCoin, range]);
 
   if (!portfolio) {
-    return <p className="text-slate-400">Loading...</p>;
+    return <p className="text-slate-400">Loading portfolio…</p>;
   }
 
   if (portfolio.empty) {
@@ -58,7 +79,6 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-10">
-      {/* Top cards */}
       <div className="grid gap-6 md:grid-cols-2">
         <AssetsCard
           assets={portfolio.breakdown}
@@ -72,7 +92,6 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Chart */}
       <CoinMarketChart
         data={chartData}
         coin={selectedCoin}
