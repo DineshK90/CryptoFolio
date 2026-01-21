@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { updateProfile } from "firebase/auth";
 import { useAuth } from "../hooks/useAuth";
 import { uploadProfilePicture } from "../services/storage";
@@ -83,23 +84,57 @@ export default function ProfilePage() {
     }
   }
 
-  return (
-    <div className="max-w-lg">
-      <h1 className="text-2xl font-semibold mb-6">
-        Profile
-      </h1>
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 },
+    },
+  };
 
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-6">
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+  };
+
+  return (
+    <motion.div
+      className="max-w-lg relative"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      {/* Decorative background */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -z-10" />
+
+      <motion.h1 
+        variants={itemVariants}
+        className="text-4xl font-bold mb-8 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent"
+      >
+        Profile
+      </motion.h1>
+
+      <motion.div
+        variants={itemVariants}
+        className="relative bg-slate-900/80 backdrop-blur-md border border-slate-700/50 rounded-2xl p-8 space-y-8 shadow-xl overflow-hidden"
+      >
+        {/* Decorative glow */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 pointer-events-none" />
+        
+        {/* Corner accent */}
+        <div className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-indigo-500/30 rounded-tr-2xl" />
+
         {/* Avatar */}
-        <div className="flex items-center gap-4">
-          <img
+        <motion.div variants={itemVariants} className="flex items-center gap-6 relative z-10">
+          <motion.img
+            whileHover={{ scale: 1.05 }}
             src={preview || "/avatar-placeholder.png"}
             alt="Profile"
-            className="w-20 h-20 rounded-full border border-slate-700 object-cover"
+            className="w-24 h-24 rounded-full border-2 border-indigo-500/50 object-cover shadow-lg"
           />
 
-          <div className="space-y-2">
-            <label className="block">
+          <div className="space-y-3">
+            <motion.label className="block">
               <span className="sr-only">Upload avatar</span>
               <input
                 type="file"
@@ -109,24 +144,25 @@ export default function ProfilePage() {
                 className="block text-sm text-slate-400
                   file:mr-4 file:py-2 file:px-4
                   file:rounded-md file:border-0
-                  file:bg-slate-800 file:text-slate-300
-                  hover:file:bg-slate-700"
+                  file:bg-indigo-600 file:text-slate-100 file:font-medium
+                  hover:file:bg-indigo-500 file:transition-colors"
               />
-            </label>
+            </motion.label>
 
-            <button
+            <motion.button
+              whileHover={{ x: 4 }}
               onClick={handleRandomAvatar}
               disabled={loading}
-              className="text-sm text-indigo-400 hover:text-indigo-300 transition"
+              className="text-sm text-indigo-400 hover:text-indigo-300 font-medium transition"
             >
-              Generate random avatar
-            </button>
+              ✨ Generate random avatar
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Name */}
-        <div>
-          <p className="text-slate-400 text-sm mb-1">Name</p>
+        <motion.div variants={itemVariants} className="relative z-10">
+          <p className="text-slate-300 text-sm font-medium mb-3">Name</p>
 
           {editingName ? (
             <div className="flex gap-2">
@@ -134,47 +170,52 @@ export default function ProfilePage() {
                 value={nameInput}
                 onChange={(e) => setNameInput(e.target.value)}
                 disabled={loading}
-                className="flex-1 bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+                className="flex-1 bg-slate-950/50 border border-slate-700/50 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
               />
 
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={handleSaveName}
                 disabled={loading}
-                className="bg-indigo-500 hover:bg-indigo-400 px-3 rounded-md text-sm"
+                className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 px-4 rounded-lg text-sm font-medium transition"
               >
                 Save
-              </button>
+              </motion.button>
 
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   setEditingName(false);
                   setNameInput(user.displayName || "");
                 }}
                 disabled={loading}
-                className="text-slate-400 hover:text-white text-sm"
+                className="text-slate-400 hover:text-slate-300 text-sm font-medium transition"
               >
                 Cancel
-              </button>
+              </motion.button>
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              <p>{user?.displayName}</p>
-              <button
+              <p className="text-slate-100 font-medium">{user?.displayName}</p>
+              <motion.button
+                whileHover={{ x: 2 }}
                 onClick={() => setEditingName(true)}
-                className="text-sm text-indigo-400 hover:text-indigo-300"
+                className="text-sm text-indigo-400 hover:text-indigo-300 font-medium transition"
               >
-                Edit
-              </button>
+                ✏️ Edit
+              </motion.button>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* Email */}
-        <div>
-          <p className="text-slate-400 text-sm">Email</p>
-          <p>{user?.email}</p>
-        </div>
-      </div>
-    </div>
+        <motion.div variants={itemVariants} className="relative z-10">
+          <p className="text-slate-300 text-sm font-medium mb-2">Email Address</p>
+          <p className="text-slate-100 font-medium">{user?.email}</p>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import AssetsCard from "../components/dashboard/AssetsCard";
 import TotalValueCard from "../components/dashboard/TotalValueCard";
 import CoinMarketChart from "../components/dashboard/CoinMarketChart";
@@ -77,9 +78,31 @@ export default function DashboardPage() {
     portfolio.breakdown.reduce((s, a) => s + a.change24h, 0) /
     portfolio.breakdown.length;
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+  };
+
   return (
-    <div className="max-w-6xl mx-auto space-y-10">
-      <div className="grid gap-6 md:grid-cols-2">
+    <motion.div
+      className="relative max-w-6xl mx-auto space-y-10 py-6"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      {/* Decorative background elements */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl -z-10" />
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl -z-10" />
+
+      <motion.div variants={itemVariants} className="grid gap-6 md:grid-cols-2">
         <AssetsCard
           assets={portfolio.breakdown}
           onSelect={setSelectedCoin}
@@ -90,14 +113,16 @@ export default function DashboardPage() {
           totalValue={portfolio.totalValue}
           changePercent={avgChange}
         />
-      </div>
+      </motion.div>
 
-      <CoinMarketChart
-        data={chartData}
-        coin={selectedCoin}
-        range={range}
-        onRangeChange={setRange}
-      />
-    </div>
+      <motion.div variants={itemVariants}>
+        <CoinMarketChart
+          data={chartData}
+          coin={selectedCoin}
+          range={range}
+          onRangeChange={setRange}
+        />
+      </motion.div>
+    </motion.div>
   );
 }
