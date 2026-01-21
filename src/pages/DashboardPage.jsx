@@ -36,6 +36,12 @@ export default function DashboardPage() {
 
         const aggregated = calculatePortfolio(rawAssets, prices);
 
+        // If all holdings were filtered out (zero quantities), show empty state
+        if (!aggregated.breakdown.length) {
+          setPortfolio({ empty: true });
+          return;
+        }
+
         setPortfolio(aggregated);
         setSelectedCoin(aggregated.breakdown[0].coin_id);
 
@@ -75,8 +81,10 @@ export default function DashboardPage() {
   }
 
   const avgChange =
-    portfolio.breakdown.reduce((s, a) => s + a.change24h, 0) /
-    portfolio.breakdown.length;
+    portfolio.breakdown.length > 0
+      ? portfolio.breakdown.reduce((s, a) => s + a.change24h, 0) /
+        portfolio.breakdown.length
+      : 0;
 
   const containerVariants = {
     hidden: { opacity: 0 },
