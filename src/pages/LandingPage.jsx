@@ -1,7 +1,7 @@
 import HeroSection from "../components/landing/HeroSection";
 import FeaturesSection from "../components/landing/FeaturesSection";
 import HowItWorks from "../components/landing/HowItWorks";
-import CTASection from "../components/landing/CTASection";
+
 import Footer from "../components/landing/Footer";
 import ComparisonSection from "../components/landing/ComparisonSection";
 import dashboardPreview from "../assets/dashboard/dashboard-preview.png";
@@ -161,9 +161,6 @@ export default function LandingPage() {
 
       {/* HOW IT WORKS */}
       <HowItWorks />
-
-      {/* CTA */}
-      <CTASection />
 
       {/* FOOTER */}
       <Footer />
