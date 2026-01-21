@@ -14,7 +14,8 @@ async function fetchWithTimeout(url, ms = 8000) {
   const timer = setTimeout(() => controller.abort(), ms);
 
   try {
-    return await fetch(url, { signal: controller.signal });
+    const res = await fetch(url, { signal: controller.signal });
+    return res;
   } catch (err) {
     console.warn("Price fetch failed:", url, err.message);
     return null;
@@ -26,38 +27,51 @@ async function fetchWithTimeout(url, ms = 8000) {
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /* =====================
-   FETCH PRICES (SAFE)
+   FETCH PRICES (HARDENED)
 ===================== */
 export async function fetchCoinPrices(coinIds = []) {
   if (!coinIds.length) return {};
 
-  const groups = chunk(coinIds, 3); // CoinGecko-safe batching
+  const groups = chunk(coinIds, 3);
   const merged = {};
+  const failed = [];
 
   for (const group of groups) {
-    let attempts = 0;
     let success = false;
 
-    while (attempts < 2 && !success) {
+    for (let attempt = 1; attempt <= 3 && !success; attempt++) {
       const res = await fetchWithTimeout(
         `${API_BASE}/market/prices?ids=${group.join(",")}`
       );
 
       if (res && res.ok) {
         const data = await res.json();
-        Object.assign(merged, data);
+
+        // Validate shape
+        for (const id of group) {
+          if (!data[id] || data[id].usd == null) {
+            failed.push(id);
+          } else {
+            merged[id] = {
+              usd: Number(data[id].usd),
+              usd_24h_change: Number(data[id].usd_24h_change || 0),
+            };
+          }
+        }
+
         success = true;
       } else {
-        attempts += 1;
         console.warn(
-          `Price batch failed (attempt ${attempts})`,
+          `Price batch failed (attempt ${attempt})`,
           group
         );
-        if (attempts < 2) {
-          await sleep(400 * attempts);
-        }
+        await sleep(300 * attempt);
       }
     }
+  }
+
+  if (failed.length) {
+    console.warn("Missing prices for:", failed);
   }
 
   return merged;
