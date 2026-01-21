@@ -57,9 +57,11 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-4xl md:text-5xl font-semibold leading-tight mb-6">
-            Track Your Crypto Portfolio
-            <span className="block text-indigo-400 mt-1">
+          <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
+            <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              Track Your Crypto Portfolio
+            </span>
+            <span className="block text-white mt-2">
               With Confidence
             </span>
           </h1>

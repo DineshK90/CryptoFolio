@@ -3,7 +3,9 @@ export default function ComparisonSection() {
     <section className="py-32 px-6 bg-slate-950/60">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-3xl md:text-4xl font-semibold text-center mb-4">
-          Built for Clarity, Not Complexity
+          <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Built for Clarity, Not Complexity
+          </span>
         </h2>
 
         <p className="text-slate-400 text-center mb-16 max-w-2xl mx-auto">

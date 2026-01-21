@@ -34,8 +34,10 @@ export default function FeaturesSection() {
       <div className="max-w-7xl mx-auto">
         {/* Heading */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-semibold mb-4 tracking-tight">
-            Everything You Need to Track Your Portfolio
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">
+            <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              Everything You Need to Track Your Portfolio
+            </span>
           </h2>
 
           <p className="text-slate-400 text-base md:text-lg">

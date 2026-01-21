@@ -94,7 +94,7 @@ export default function HowItWorks() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid md:grid-cols-3 gap-8 mb-12"
+          className="grid md:grid-cols-3 gap-8"
         >
           {steps.map((step, idx) => (
             <motion.div
@@ -148,34 +148,6 @@ export default function HowItWorks() {
               )}
             </motion.div>
           ))}
-        </motion.div>
-
-        {/* Bottom CTA section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="relative bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 border border-indigo-500/20 rounded-2xl p-8 md:p-12 text-center overflow-hidden"
-        >
-          {/* Decorative accent */}
-          <div className="absolute top-0 left-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl -z-10" />
-          <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl -z-10" />
-
-          <h3 className="text-2xl font-bold mb-3 text-slate-100">
-            Ready to get started?
-          </h3>
-          <p className="text-slate-400 mb-6 max-w-2xl mx-auto">
-            Join thousands of crypto investors who are already using CryptoFolio to track and optimize their portfolios with confidence.
-          </p>
-          <motion.a
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            href="/register"
-            className="inline-block bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-indigo-500/50"
-          >
-            Create Account Now
-          </motion.a>
         </motion.div>
       </div>
     </section>
