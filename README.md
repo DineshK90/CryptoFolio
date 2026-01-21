@@ -7,21 +7,36 @@
 ![Firebase](https://img.shields.io/badge/Firebase-12.7.0-FFCA28?style=flat&logo=firebase&logoColor=black)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-3.4.17-38B2AC?style=flat&logo=tailwind-css&logoColor=white)
 
+## 📢 Latest Updates (v1.2.0)
+
+✨ **New Features:**
+
+- 📈 Market chart API endpoint for fetching historical price data
+- 🗑️ Auto-delete functionality - coins automatically removed when selling all holdings
+- 🎨 Enhanced landing page with dashboard preview image and fintech styling
+- ✨ Scroll-triggered Framer Motion animations on portfolio preview section
+- 🚀 Improved error handling with fallback dashboard preview image
+- 🧹 Portfolio filtering - zero-quantity holdings automatically hidden from display
+
 ## 🌟 Features
 
 ### 📊 Portfolio Management
 
 - **Real-time Asset Tracking** - Monitor your cryptocurrency holdings with live price updates
 - **Buy/Sell Transactions** - Record purchases and sales with automatic portfolio calculations
+- **Auto-Remove Zero Holdings** - Assets automatically removed from portfolio when quantity reaches zero
 - **Total Value Overview** - See your complete portfolio value at a glance with 24-hour change percentages
 - **Multi-Asset Support** - Track multiple cryptocurrencies from a vast selection of coins
+- **Clean Portfolio Display** - Zero-quantity coins automatically filtered out for a cleaner view
 
 ### 📈 Market Data & Analytics
 
 - **Live Market Charts** - Interactive price charts powered by Recharts with customizable timeframes (7D, 30D, 90D)
 - **CoinGecko Integration** - Real-time market data from one of the most reliable crypto APIs
+- **Market Chart API** - Dedicated endpoint for fetching historical price data with proper error handling
 - **Price Sparklines** - Quick visual indicators for each asset's recent performance
 - **Historical Data** - View price trends with full date information and tooltips
+- **Graph Fallback Preview** - Dashboard preview image shown when market data fails to load
 
 ### 👤 User Experience
 
@@ -30,14 +45,17 @@
 - **Responsive Design** - Fully mobile-optimized with hamburger menu navigation
 - **Dark Theme** - Modern slate-950 dark UI that's easy on the eyes
 - **Smooth Animations** - Powered by Framer Motion for delightful interactions
+- **Fintech Styling** - Premium gradient text, glass-morphism effects, and tech-inspired UI elements
 
 ### 🎨 Landing Page
 
 - **Hero Section** - Engaging introduction with live Bitcoin price preview
 - **Feature Highlights** - Visual showcase of key platform capabilities
+- **Portfolio Preview Section** - Animated showcase with dashboard preview image and fintech styling
 - **Comparison Section** - Color-coded benefits vs. typical trackers (green/red contrast)
 - **How It Works** - Step-by-step guide for new users
 - **Responsive Navigation** - Clean desktop and mobile navigation experiences
+- **Advanced Animations** - Scroll-triggered entrance animations with Framer Motion
 
 ## 🚀 Tech Stack
 
@@ -149,8 +167,12 @@ cryptofolio/
 │   ├── assets/
 │   │   └── [id].js              # PATCH/DELETE specific asset
 │   └── market/
-│       └── prices.js            # GET crypto prices
+│       ├── prices.js            # GET crypto prices
+│       └── chart.js             # GET market chart data (NEW)
 ├── src/
+│   ├── assets/
+│   │   ├── dashboard/           # Dashboard preview images (NEW)
+│   │   └── landing/             # Landing page assets
 │   ├── components/
 │   │   ├── auth/                # Authentication forms
 │   │   ├── dashboard/           # Portfolio & chart components
@@ -202,10 +224,11 @@ npm run lint
 
 - `GET /api/assets` - Fetch user's portfolio assets
 - `POST /api/assets` - Add new transaction (buy/sell)
-- `PATCH /api/assets/[id]` - Update specific asset
+- `PUT /api/assets` - Update asset (auto-deletes when quantity ≤ 0)
 - `DELETE /api/assets/[id]` - Delete asset transaction
 - `POST /api/users` - Create user record
 - `GET /api/market/prices` - Fetch current crypto prices
+- `GET /api/market/chart` - Fetch market chart data (NEW) with coin ID and days parameters
 
 ### External APIs
 
@@ -215,17 +238,25 @@ npm run lint
 
 ## 🎨 Key Features Implementation
 
-### Responsive Mobile Navigation
+### Portfolio Management
 
-- Desktop: Horizontal nav with all options visible
-- Mobile: Hamburger menu with vertical dropdown
-- Smooth transitions and proper touch targets
+- **Auto-Remove Holdings** - When selling all coins of a type, the transaction updates to zero and is automatically deleted from the database via the PUT endpoint logic
+- **Clean Portfolio Display** - The portfolio calculation utility filters out any holdings with quantity ≤ 0 before displaying
+- **Smart Sell Logic** - Selling reduces the first asset record and triggers deletion if total reaches zero
 
-### Date Formatting in Charts
+### Market Data Visualization
 
-- X-axis: Short format (e.g., "Jan 15") to prevent crowding
-- Angled labels at -45° for better readability
-- Tooltips: Full date with year (e.g., "Jan 15, 2026")
+- **Chart API Endpoint** - New dedicated `/api/market/chart` endpoint fetches historical price data from CoinGecko with timeout protection
+- **Responsive Mobile Navigation** - Desktop: Horizontal nav with all options visible; Mobile: Hamburger menu with vertical dropdown
+- **Date Formatting in Charts** - X-axis: Short format (e.g., "Jan 15") to prevent crowding; Tooltips: Full date with year
+
+### Landing Page Enhancement
+
+- **Dashboard Preview** - High-quality screenshot of the portfolio dashboard integrated into the landing page
+- **Animated Section** - "See Your Portfolio Clearly" section features scroll-triggered Framer Motion animations
+- **Fintech Styling** - Gradient text (indigo→purple→pink), glass-morphism effects, animated accent bars, and tech grid background
+- **Interactive Hover Effects** - Image scales up (1.05x), glowing border appears, and gradient overlay activates on hover
+- **Perpetual Animations** - Decorative corner bars animate continuously for a premium feel
 
 ### Comparison Section
 
