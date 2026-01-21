@@ -32,20 +32,33 @@ export default function AddAssetPage() {
     const amount = Number(e.target.quantity.value);
 
     // Calculate total quantity across all records for this coin
-    const totalQuantity = assets
-      .filter((a) => a.coin_id === coinId)
-      .reduce((sum, a) => sum + Number(a.quantity), 0);
+    const coinAssets = assets.filter((a) => a.coin_id === coinId);
+    const totalQuantity = coinAssets.reduce((sum, a) => sum + Number(a.quantity), 0);
 
     if (mode === "sell") {
       if (amount > totalQuantity) {
         alert(`Cannot sell more than you own. You have ${totalQuantity} available.`);
         return;
       }
-    }
 
-    // Always add a new transaction record (positive for buy, negative for sell)
-    const transactionAmount = mode === "buy" ? amount : -amount;
-    await addAsset(coinId, transactionAmount);
+      // Calculate new total after selling
+      const newTotal = totalQuantity - amount;
+
+      // If selling all coins, delete all records for this coin
+      if (newTotal <= 0) {
+        for (const asset of coinAssets) {
+          await updateAsset(asset.id, 0);
+        }
+      } else {
+        // Otherwise, reduce the first record proportionally
+        const firstAsset = coinAssets[0];
+        const newQuantity = Number(firstAsset.quantity) - amount;
+        await updateAsset(firstAsset.id, newQuantity);
+      }
+    } else {
+      // For buy, just add a new transaction record
+      await addAsset(coinId, amount);
+    }
 
     navigate("/app");
   }
