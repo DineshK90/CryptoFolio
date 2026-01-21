@@ -23,6 +23,8 @@ async function fetchWithTimeout(url, ms = 8000) {
   }
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 /* =====================
    FETCH PRICES (SAFE)
 ===================== */
@@ -33,17 +35,29 @@ export async function fetchCoinPrices(coinIds = []) {
   const merged = {};
 
   for (const group of groups) {
-    const res = await fetchWithTimeout(
-      `${API_BASE}/market/prices?ids=${group.join(",")}`
-    );
+    let attempts = 0;
+    let success = false;
 
-    if (!res || !res.ok) {
-      console.warn("Skipping failed price batch:", group);
-      continue;
+    while (attempts < 2 && !success) {
+      const res = await fetchWithTimeout(
+        `${API_BASE}/market/prices?ids=${group.join(",")}`
+      );
+
+      if (res && res.ok) {
+        const data = await res.json();
+        Object.assign(merged, data);
+        success = true;
+      } else {
+        attempts += 1;
+        console.warn(
+          `Price batch failed (attempt ${attempts})`,
+          group
+        );
+        if (attempts < 2) {
+          await sleep(400 * attempts);
+        }
+      }
     }
-
-    const data = await res.json();
-    Object.assign(merged, data);
   }
 
   return merged;
