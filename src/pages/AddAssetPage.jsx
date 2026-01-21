@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AddAssetForm from "../components/dashboard/AddAssetForm";
 import { fetchCoins } from "../services/coingecko";
-import { fetchAssets, addAsset, updateAsset } from "../services/api";
+import { fetchAssets, addAsset, updateAsset, deleteAsset } from "../services/api";
 
 export default function AddAssetPage() {
   const navigate = useNavigate();
@@ -16,7 +16,6 @@ export default function AddAssetPage() {
         fetchCoins(),
         fetchAssets(),
       ]);
-
       setCoins(coinList);
       setAssets(assetList);
       setLoading(false);
@@ -31,32 +30,31 @@ export default function AddAssetPage() {
     const coinId = e.target.coin.value;
     const amount = Number(e.target.quantity.value);
 
-    // Calculate total quantity across all records for this coin
-    const coinAssets = assets.filter((a) => a.coin_id === coinId);
-    const totalQuantity = coinAssets.reduce((sum, a) => sum + Number(a.quantity), 0);
+    const coinAssets = assets.filter(a => a.coin_id === coinId);
+    const total = coinAssets.reduce((s, a) => s + Number(a.quantity), 0);
 
     if (mode === "sell") {
-      if (amount > totalQuantity) {
-        alert(`Cannot sell more than you own. You have ${totalQuantity} available.`);
+      if (amount > total) {
+        alert(`You only own ${total}`);
         return;
       }
 
-      // Calculate new total after selling
-      const newTotal = totalQuantity - amount;
+      let remaining = amount;
 
-      // If selling all coins, delete all records for this coin
-      if (newTotal <= 0) {
-        for (const asset of coinAssets) {
-          await updateAsset(asset.id, 0);
+      for (const asset of coinAssets) {
+        if (remaining <= 0) break;
+
+        const qty = Number(asset.quantity);
+
+        if (qty <= remaining) {
+          await deleteAsset(asset.id);   // 🔥 REAL DELETE
+          remaining -= qty;
+        } else {
+          await updateAsset(asset.id, qty - remaining);
+          remaining = 0;
         }
-      } else {
-        // Otherwise, reduce the first record proportionally
-        const firstAsset = coinAssets[0];
-        const newQuantity = Number(firstAsset.quantity) - amount;
-        await updateAsset(firstAsset.id, newQuantity);
       }
     } else {
-      // For buy, just add a new transaction record
       await addAsset(coinId, amount);
     }
 

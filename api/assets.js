@@ -5,7 +5,6 @@ import pkg from "pg";
 const { Pool } = pkg;
 
 let pool;
-
 function getPool() {
   if (!pool) {
     pool = new Pool({
@@ -77,13 +76,13 @@ export default async function handler(req, res) {
         VALUES ($1,$2,$3)
         RETURNING *
         `,
-        [userId, coinId, Number(quantity)]
+        [userId, coinId, quantity]
       );
 
       return res.json(result.rows[0]);
     }
 
-    /* ===== UPDATE (AUTO DELETE WHEN 0) ===== */
+    /* ===== UPDATE / AUTO DELETE ===== */
     if (req.method === "PUT") {
       const { id, quantity } = req.body;
 
@@ -91,14 +90,13 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: "Missing id or quantity" });
       }
 
-      const qty = Number(quantity);
-
-      // 🔥 Auto-delete when quantity is 0 or less
-      if (qty <= 0) {
+      // 🔥 AUTO DELETE when quantity <= 0
+      if (Number(quantity) <= 0) {
         await db.query(
           "DELETE FROM assets WHERE id=$1 AND user_id=$2",
           [id, userId]
         );
+
         return res.json({ deleted: true });
       }
 
@@ -109,7 +107,7 @@ export default async function handler(req, res) {
         WHERE id=$2 AND user_id=$3
         RETURNING *
         `,
-        [qty, id, userId]
+        [quantity, id, userId]
       );
 
       if (!result.rows.length) {
