@@ -3,7 +3,7 @@ import axios from "axios";
 export default async function handler(req, res) {
   try {
     if (req.method !== "GET") {
-      return res.status(405).json({ error: "Method not allowed" });
+      return res.status(405).json({ prices: [], error: "Method not allowed" });
     }
 
     const { coin, days } = req.query;
@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     if (!coin || !days) {
       return res.status(400).json({
         prices: [],
-        error: "Missing params",
+        error: "Missing coin or days parameter",
       });
     }
 
@@ -26,14 +26,23 @@ export default async function handler(req, res) {
       }
     );
 
-    return res.status(200).json({
-      prices: response.data.prices || [],
-    });
-  } catch (err) {
-    console.error("MARKET CHART ERROR:", err.message);
+    const prices = response.data?.prices;
+    if (!Array.isArray(prices)) {
+      console.error("Invalid response from CoinGecko:", response.data);
+      return res.status(200).json({
+        prices: [],
+        error: "Invalid data from market API",
+      });
+    }
 
     return res.status(200).json({
-      prices: [], // 🔥 NEVER break frontend
+      prices: prices,
+    });
+  } catch (err) {
+    console.error("MARKET CHART ERROR:", err.message, err.code);
+
+    return res.status(200).json({
+      prices: [],
       error: err.message,
     });
   }
