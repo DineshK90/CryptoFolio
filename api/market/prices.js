@@ -25,11 +25,13 @@ export default async function handler(req, res) {
       }
     );
 
+    const payload = response.data || {};
+
     // 🔐 Normalize output
     const safe = {};
     for (const id of ids.split(",")) {
-      const coin = response.data[id];
-      if (coin) {
+      const coin = payload[id];
+      if (coin && typeof coin === "object") {
         safe[id] = {
           usd: Number(coin.usd || 0),
           usd_24h_change: Number(coin.usd_24h_change || 0),
@@ -37,9 +39,10 @@ export default async function handler(req, res) {
       }
     }
 
-    return res.json(safe);
+    return res.status(200).json(safe);
   } catch (err) {
-    console.error("CoinGecko error:", err.message);
-    return res.status(500).json({ error: "Price service failed" });
+    // Never break the frontend; return empty data with context
+    console.error("CoinGecko price error:", err.message, err.response?.status);
+    return res.status(200).json({});
   }
 }
