@@ -1,30 +1,20 @@
 const API_BASE = "/api";
 
-/* =====================
-   Fetch Coin Chart (safe)
-===================== */
-
-async function fetchWithTimeout(url, timeout = 8000) {
-  return Promise.race([
-    fetch(url),
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Request timed out")), timeout)
-    ),
-  ]);
-}
-
 export async function fetchCoinMarketChart(coinId, days = 7) {
-  const res = await fetchWithTimeout(
+  const res = await fetch(
     `${API_BASE}/market/chart?coin=${coinId}&days=${days}`
   );
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch market data");
-  }
+  if (!res.ok) throw new Error("Failed to fetch market data");
 
   const data = await res.json();
 
-  return data.map(([timestamp, price]) => ({
+  if (!Array.isArray(data.prices)) {
+    console.warn("Bad chart response:", data);
+    return [];
+  }
+
+  return data.prices.map(([timestamp, price]) => ({
     timestamp,
     time: new Date(timestamp).toLocaleDateString("en-US", {
       month: "short",
