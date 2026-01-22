@@ -21,6 +21,8 @@ export default function CoinMarketChart({
   range,
   onRangeChange,
 }) {
+  const hasData = Array.isArray(data) && data.length > 0;
+
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
       {/* Header */}
@@ -49,54 +51,62 @@ export default function CoinMarketChart({
       </div>
 
       {/* Chart */}
-      <ResponsiveContainer width="100%" aspect={3}>
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+      <div className="w-full h-[260px]">
+        {hasData ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
 
-          <XAxis
-            dataKey="time"
-            tick={{ fill: "#94a3b8", fontSize: 12 }}
-            tickLine={false}
-            axisLine={false}
-            angle={-45}
-            textAnchor="end"
-            height={60}
-          />
+              <XAxis
+                dataKey="time"
+                tick={{ fill: "#94a3b8", fontSize: 12 }}
+                tickLine={false}
+                axisLine={false}
+                angle={-45}
+                textAnchor="end"
+                height={60}
+              />
 
-          <YAxis
-            tickFormatter={(v) => `$${v.toLocaleString()}`}
-            tick={{ fill: "#94a3b8", fontSize: 12 }}
-            tickLine={false}
-            axisLine={false}
-            width={80}
-          />
+              <YAxis
+                tickFormatter={(v) => `$${v.toLocaleString()}`}
+                tick={{ fill: "#94a3b8", fontSize: 12 }}
+                tickLine={false}
+                axisLine={false}
+                width={80}
+              />
 
-          <Tooltip
-            formatter={(v) => [`$${v.toLocaleString()}`, "Price"]}
-            labelFormatter={(label, payload) => {
-              if (payload && payload[0]?.payload?.fullDate) {
-                return payload[0].payload.fullDate;
-              }
-              return label;
-            }}
-            contentStyle={{
-              backgroundColor: "#020617",
-              border: "1px solid #1e293b",
-              borderRadius: "8px",
-            }}
-            labelStyle={{ color: "#94a3b8" }}
-          />
+              <Tooltip
+                formatter={(v) => [`$${v.toLocaleString()}`, "Price"]}
+                labelFormatter={(label, payload) => {
+                  if (payload && payload[0]?.payload?.fullDate) {
+                    return payload[0].payload.fullDate;
+                  }
+                  return label;
+                }}
+                contentStyle={{
+                  backgroundColor: "#020617",
+                  border: "1px solid #1e293b",
+                  borderRadius: "8px",
+                }}
+                labelStyle={{ color: "#94a3b8" }}
+              />
 
-          <Line
-            type="monotone"
-            dataKey="price"
-            stroke="#6366f1"
-            strokeWidth={2}
-            dot={false}
-            isAnimationActive
-          />
-        </LineChart>
-      </ResponsiveContainer>
+              <Line
+                type="monotone"
+                dataKey="price"
+                stroke="#6366f1"
+                strokeWidth={2}
+                dot={false}
+                isAnimationActive
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="h-full flex items-center justify-center text-slate-400 text-sm">
+            No market data available for this range.
+          </div>
+        )}
+      </div>
     </div>
   );
 }
