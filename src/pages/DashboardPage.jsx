@@ -18,6 +18,7 @@ export default function DashboardPage() {
   const [chartData, setChartData] = useState([]);
   const [range, setRange] = useState(7);
   const [loading, setLoading] = useState(true);
+  const [chartError, setChartError] = useState(false);
 
   // Reload whenever we return from Buy/Sell
   useEffect(() => {
@@ -73,10 +74,21 @@ export default function DashboardPage() {
 
     async function loadChart() {
       try {
+        setChartError(false);
         const data = await fetchCoinMarketChart(selectedCoin, range);
-        if (mounted) setChartData(data);
+        if (!mounted) return;
+
+        if (data.length) {
+          setChartData(data);
+          setChartError(false);
+        } else {
+          // Keep previous series if new data is empty (rate limits or CG hiccups)
+          setChartError(true);
+          setChartData((prev) => prev);
+        }
       } catch (err) {
         console.error("Chart load failed:", err);
+        if (mounted) setChartError(true);
       }
     }
 
@@ -136,6 +148,7 @@ export default function DashboardPage() {
           coin={selectedCoin}
           range={range}
           onRangeChange={setRange}
+          loading={loading}
         />
       </motion.div>
     </motion.div>

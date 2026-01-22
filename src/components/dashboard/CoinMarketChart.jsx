@@ -20,6 +20,7 @@ export default function CoinMarketChart({
   coin,
   range,
   onRangeChange,
+  loading = false,
 }) {
   const hasData = Array.isArray(data) && data.length > 0;
 
@@ -52,7 +53,11 @@ export default function CoinMarketChart({
 
       {/* Chart */}
       <div className="w-full h-[260px]">
-        {hasData ? (
+        {loading ? (
+          <div className="h-full flex items-center justify-center text-slate-400 text-sm">
+            Loading chart…
+          </div>
+        ) : hasData ? (
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -122,4 +127,5 @@ CoinMarketChart.propTypes = {
   coin: PropTypes.string,
   range: PropTypes.number.isRequired,
   onRangeChange: PropTypes.func.isRequired,
+  loading: PropTypes.bool,
 };
